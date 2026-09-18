@@ -27,644 +27,631 @@
         .disabled-box { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col h-screen overflow-hidden">
+<body class="min-h-screen flex flex-col h-screen overflow-hidden relative">
 
-    <!-- Notificações do Sistema (Substituindo alerts) -->
-    <div id="system-toast" class="fixed top-20 right-4 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-2xl transform translate-x-full opacity-0 transition-all duration-300 z-50 flex items-center gap-3 border border-slate-700">
-        <div id="system-toast-icon" class="text-emerald-500"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
-        <span id="system-toast-msg" class="text-sm font-medium">Sucesso!</span>
-    </div>
+    <!-- TELA DE LOGIN (Sobrepõe o App) -->
+    <div id="login-screen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-8 w-full max-w-md relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-600 to-amber-400"></div>
+            
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-black text-white tracking-tight flex items-center justify-center gap-3 mb-2">
+                    XTREMA <span class="bg-amber-500 text-slate-900 text-xs px-2 py-0.5 rounded uppercase">PRO</span>
+                </h1>
+                <p class="text-slate-400 text-sm">Acesso restrito a consultores autorizados.</p>
+            </div>
 
-    <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-30 flex-shrink-0 shadow-lg">
-        <div class="max-w-[1400px] mx-auto flex justify-between items-center gap-4">
-            <div class="flex items-center gap-6">
+            <form id="form-login" class="space-y-4">
                 <div>
-                    <h1 class="text-xl font-bold text-white tracking-tight flex items-center gap-3">
-                        XTREMA
-                        <span class="bg-amber-500 text-slate-900 text-[10px] px-2 py-0.5 rounded font-black tracking-wider uppercase">PRO PILOTO</span>
-                    </h1>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">E-mail Corporativo</label>
+                    <input type="email" id="login-email" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none transition-colors" placeholder="consultor@xtrema.com">
                 </div>
-                <!-- Nav top -->
-                <div class="hidden md:flex gap-2">
-                    <button onclick="goToView('dashboard')" id="btn-nav-dash" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-slate-800 text-slate-300 hover:text-white">Dashboard</button>
-                    <button onclick="goToView('sdr')" id="btn-nav-sdr" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-slate-800 text-slate-300 hover:text-white">Script SDR (WhatsApp)</button>
-                    <button onclick="goToView('flow')" id="btn-nav-flow" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-amber-500/20 text-amber-500 border border-amber-500/30">Fluxo da Call</button>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <div class="text-right hidden md:block">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Tempo de Call</p>
-                    <p id="call-timer" class="text-lg font-mono font-bold text-amber-500 leading-none">00:00</p>
-                </div>
-                <button id="btn-timer" class="bg-slate-800 text-slate-500 border border-slate-700 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 cursor-default">
-                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> Aguardando
-                </button>
-            </div>
-        </div>
-        
-        <!-- Painel Tático Estático (Visível apenas na Call) -->
-        <div id="static-insight-panel" class="max-w-[1400px] mx-auto mt-4 grid-cols-5 gap-2 hidden transition-all duration-300">
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-amber-500/30 shadow-inner flex flex-col justify-center">
-                <span class="text-[9px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">Nível de Consciência</span>
-                <span id="hdr-nivel" class="text-white text-[11px] font-medium truncate">1. Inconsciente</span>
-            </div>
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
-                <span class="text-[9px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Ambição</span>
-                <span id="hdr-ambicao" class="text-slate-300 text-[11px] font-medium truncate" title="Aguardando...">-</span>
-            </div>
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
-                <span class="text-[9px] text-red-400 font-bold uppercase tracking-wider mb-0.5">Dor / Problema</span>
-                <span id="hdr-dor" class="text-slate-300 text-[11px] font-medium truncate" title="Aguardando...">-</span>
-            </div>
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
-                <span class="text-[9px] text-blue-400 font-bold uppercase tracking-wider mb-0.5">O Sonho (Céu)</span>
-                <span id="hdr-sonho" class="text-slate-300 text-[11px] font-medium truncate" title="Aguardando...">-</span>
-            </div>
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
-                <span class="text-[9px] text-purple-400 font-bold uppercase tracking-wider mb-0.5">A Transformação</span>
-                <span id="hdr-transformacao" class="text-slate-300 text-[11px] font-medium truncate" title="Aguardando...">-</span>
-            </div>
-            <div class="bg-slate-950 p-2.5 rounded-lg border border-amber-500/30 shadow-inner flex flex-col justify-center">
-                <span class="text-[9px] text-amber-300 font-bold uppercase tracking-wider mb-0.5">Investimento</span>
-                <span id="hdr-investimento" class="text-white text-[11px] font-bold truncate">R$ 1.000 (À Vista)</span>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Workspace -->
-    <main class="flex-1 flex overflow-hidden max-w-[1400px] w-full mx-auto">
-        
-        <!-- Dashboard View (Full Width) -->
-        <div id="view-dashboard" class="hidden-view w-full p-6 overflow-y-auto">
-            <div class="mb-6 flex justify-between items-end">
                 <div>
-                    <h2 class="text-2xl font-bold text-white">Dashboard Operacional</h2>
-                    <p class="text-slate-400 text-sm">Métricas e performance das suas conversões.</p>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Senha</label>
+                    <input type="password" id="login-password" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none transition-colors" placeholder="••••••••">
                 </div>
-                <button onclick="gerarRelatorioICP()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-lg shadow-blue-900/20">
-                    <i data-lucide="file-text" class="w-4 h-4"></i> Gerar Relatório ICP
-                </button>
-            </div>
-            
-            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-                <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 relative overflow-hidden">
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Calls Feitas</p>
-                    <h3 id="dash-calls" class="text-2xl font-black text-white">0</h3>
-                </div>
-                <div class="bg-slate-800/50 border border-emerald-900/50 rounded-xl p-4 relative overflow-hidden">
-                    <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mb-1">Vendas (Ganhas)</p>
-                    <h3 id="dash-ganhas" class="text-2xl font-black text-emerald-400">0</h3>
-                </div>
-                <div class="bg-slate-800/50 border border-red-900/50 rounded-xl p-4 relative overflow-hidden">
-                    <p class="text-[10px] text-red-500 font-bold uppercase tracking-wider mb-1">Perdidas (Loss)</p>
-                    <h3 id="dash-perdidas" class="text-2xl font-black text-red-400">0</h3>
-                </div>
-                <div class="bg-slate-800/50 border border-blue-900/50 rounded-xl p-4 relative overflow-hidden">
-                    <p class="text-[10px] text-blue-500 font-bold uppercase tracking-wider mb-1">Reagendadas</p>
-                    <h3 id="dash-reagendadas" class="text-2xl font-black text-blue-400">0</h3>
-                </div>
-                <div class="bg-slate-800/50 border border-amber-900/50 rounded-xl p-4 relative overflow-hidden">
-                    <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-1">Conversão (Win Rate)</p>
-                    <h3 id="dash-taxa" class="text-2xl font-black text-amber-400">0%</h3>
-                </div>
-            </div>
-
-            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 relative">
-                <div class="flex items-center gap-2 mb-4">
-                    <h3 class="text-sm font-bold text-white">Histórico Recente de Calls (CRM)</h3>
-                    <span id="crm-status" class="bg-amber-500/20 text-amber-500 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1"><i data-lucide="wifi" class="w-3 h-3"></i> Sincronizando...</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-400">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-900/50 border-b border-slate-700">
-                            <tr>
-                                <th class="px-4 py-3 rounded-tl-lg">Data</th>
-                                <th class="px-4 py-3">Tempo</th>
-                                <th class="px-4 py-3">Nível Consciência</th>
-                                <th class="px-4 py-3">Ticket Proposto</th>
-                                <th class="px-4 py-3 rounded-tr-lg">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="crm-table-body" class="divide-y divide-slate-700/50">
-                            <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-slate-500 italic">Nenhuma call registrada ainda. Inicie uma nova call.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Script SDR View -->
-        <div id="view-sdr" class="hidden-view w-full p-6 overflow-y-auto animate-fade-in">
-            <div class="mb-6 flex justify-between items-end">
-                <div>
-                    <h2 class="text-2xl font-bold text-white">Playbook SDR • Pré-framing WhatsApp</h2>
-                    <p class="text-slate-400 text-sm">Scripts de qualificação e agendamento. Clique nos blocos para copiar.</p>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-20">
-                <!-- PARTE 1 -->
-                <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-full">
-                    <div class="bg-slate-800 p-3 border-b border-slate-700 flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider">Parte 1: Abertura</h3>
-                        <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-bold">1º Contato</span>
-                    </div>
-                    <div class="p-4 space-y-4 flex-1">
-                        <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group">
-                            <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
-                            <p class="text-xs text-slate-300 pr-6 copy-target">2 milhões e meio feitos até agora pelos novos alunos... Hoje o dia vai ser espetacular [Nome], tudo bom?<br><br>Vou te fazer algumas perguntas sobre seu Objetivo aqui... Isso nós ajuda a resolver as dificuldades que você possa enfrentar sem perda de tempo. Tudo bem?!<br><br>Qual a sua idade?<br><br>Pra eu entender seu momento: Hoje você trabalha em qual empresa?</p>
-                        </div>
-                        
-                        <div class="border-t border-slate-800 pt-3">
-                            <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Desvio: Caso queira suporte</p>
-                            <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group">
-                                <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
-                                <p class="text-xs text-slate-300 pr-6 copy-target">Eu tb quero resolver, inclusive ao vivo. Mas antes preciso entender como te ajudar?! Vou te enviar assim que terminar de fazer as perguntas, combinado?</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PARTE 2 -->
-                <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-full">
-                    <div class="bg-slate-800 p-3 border-b border-slate-700 flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider">Parte 2: Qualificação</h3>
-                        <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-bold">Condição</span>
-                    </div>
-                    <div class="p-4 space-y-4 flex-1">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div class="border border-slate-700 rounded-lg p-2 hover:border-slate-500 transition-colors">
-                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Se não trabalha</p>
-                                <div onclick="copyText(this)" class="text-[11px] text-slate-300 cursor-pointer hover:text-amber-400 copy-target">Poxa, entendi seu ponto [Nome]! E de onde vem a renda que você está investindo nesse momento?</div>
-                            </div>
-                            <div class="border border-slate-700 rounded-lg p-2 hover:border-slate-500 transition-colors">
-                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Se trabalha</p>
-                                <div onclick="copyText(this)" class="text-[11px] text-slate-300 cursor-pointer hover:text-amber-400 copy-target">Poxa, legal demais [Nome]! E quanto você quer ganhar acima do que ja tira ai?</div>
-                            </div>
-                        </div>
-                        
-                        <div class="border-t border-slate-800 pt-3">
-                            <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Após responder sobre ganhos</p>
-                            <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group mb-2">
-                                <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
-                                <p class="text-[11px] text-slate-400 mb-1 font-bold text-red-400">Se NÃO der números sólidos:</p>
-                                <p class="text-xs text-slate-300 pr-6 copy-target">Massa, mas ainda sim você não pensa em ganhar nada além do seu trabalho?</p>
-                            </div>
-                            <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group">
-                                <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
-                                <p class="text-[11px] text-slate-400 mb-1 font-bold text-emerald-400">Se DER números sólidos:</p>
-                                <p class="text-xs text-slate-300 pr-6 copy-target">Massa, sair da área de [Emprego atual] para focar no Drop ganhando R$ [Meta]/mês é um excelente objetivo. Dá uma tranquilidade muito boa pra fazer essa transição com calma!<br><br>Inclusive... Quanto você vai investir no Drop para alcançar esse faturamento?<br><br>E esse valor está reservado em dinheiro guardado a vista ou cartão de credito?</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PARTE 3 -->
-                <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-full">
-                    <div class="bg-slate-800 p-3 border-b border-slate-700 flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider">Parte 3: Agendamento</h3>
-                        <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-bold">Conversão</span>
-                    </div>
-                    <div class="p-4 space-y-4 flex-1">
-                        <div class="border-b border-slate-800 pb-3">
-                            <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Filtro Final de Verba</p>
-                            <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group mb-2">
-                                <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
-                                <p class="text-[11px] text-slate-400 mb-1 font-bold text-red-400">Se NÃO tem verba:</p>
-                                <p class="text-xs text-slate-300 pr-6 copy-target">Nem R$120,00 reais guardados vc tem pra investir? dá até pra começar sim, mas como o orçamento é enxuto, a gente precisa escolher a estratégia certa pra chegar nos R$ [Meta]...</p>
-                            </div>
-                            <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group">
-                                <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
-                                <p class="text-[11px] text-slate-400 mb-1 font-bold text-emerald-400">Se TEM capital:</p>
-                                <p class="text-xs text-slate-300 pr-6 copy-target">Antes de você tomar qualquer decisão, o ideal é a gente trocar uma ideia rápida de 15 minutos no whatsapp pra olhar o seu caso e ver se realmente é viável pra você rodar essa loja agora.</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Pitch e Follow Up</p>
-                            <div onclick="copyText(this)" class="bg-blue-950/20 hover:bg-blue-900/30 border border-blue-900/50 p-3 rounded-lg cursor-pointer transition-colors relative group mb-2">
-                                <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-blue-400"></i>
-                                <p class="text-xs text-slate-300 pr-6 copy-target">Posso te ligar ou prefere agendar uma call de Diagnostico e Analise de loja?<br><br>Tem tempo disponível hoje ou amanhã?</p>
-                            </div>
-                            <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 p-3 rounded-lg cursor-pointer transition-colors relative group">
-                                <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
-                                <p class="text-[11px] text-slate-400 mb-1 font-bold text-amber-500">Confirmação (Follow Up):</p>
-                                <p class="text-xs text-slate-300 pr-6 copy-target">Tá confirmado: seu horário, hoje às [Horário]. Passando pra avisar que sua presença é muito importante. Estamos combinados?</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Toast Notification -->
-            <div id="toast" class="fixed bottom-4 right-4 bg-emerald-500 text-slate-900 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
-                <i data-lucide="check-circle" class="w-4 h-4"></i> Script copiado!
-            </div>
-        </div>
-
-        <!-- Flow View (Split Layout) -->
-        <div id="view-flow" class="w-full h-full flex flex-col md:flex-row animate-fade-in">
-            
-            <!-- Left: Sidebar Navigation -->
-            <div class="w-full md:w-64 bg-slate-900/80 border-r border-slate-800 flex-shrink-0 overflow-y-auto p-4 flex flex-col z-10">
                 
-                <!-- Botão de Iniciar Call transferido para a Sidebar -->
-                <button onclick="iniciarNovaCall()" id="btn-start-call-sidebar" class="mb-6 w-full bg-amber-500 text-slate-900 px-4 py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-amber-400 transition-all flex items-center justify-center gap-2 animate-pulse">
-                    <i data-lucide="play" class="w-4 h-4"></i> Iniciar Nova Call
-                </button>
-
-                <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-2">Roadmap da Call</h2>
-                <nav id="sidebar-nav" class="flex md:flex-col gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
-                    <!-- Nav items generated via JS -->
-                </nav>
-            </div>
-
-            <!-- Center: Step Content Area -->
-            <div class="flex-1 bg-slate-950 flex flex-col relative overflow-hidden">
-                <div id="views-container" class="flex-1 overflow-y-auto p-6 lg:p-8">
-                    
-                    <!-- Passo 1: Rapport & Pre-framing -->
-                    <div id="step-1" class="step-content animate-fade-in">
-                        <h2 class="text-2xl font-bold text-white mb-1">1. Rapport & Setup</h2>
-                        <p class="text-slate-400 text-sm mb-6">Controle o frame utilizando o briefing gerado pelo SDR/Bot.</p>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                                <h4 class="text-white text-sm font-bold mb-1">Ancoragem de Contexto</h4>
-                                <p class="text-xs text-slate-400">Use o briefing para conectar: "Vi aqui que você trabalha com ferramentas e quer levantar uns 1.8k a mais no mês..."</p>
-                            </div>
-                            <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
-                                <h4 class="text-white text-sm font-bold mb-1">Escuta Ativa Primária</h4>
-                                <p class="text-xs text-slate-400">Capte o tom de voz. Comece a anotar palavras-chave no Smart CRM ao lado.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Passo 2: Qualificação -->
-                    <div id="step-2" class="step-content hidden-view animate-fade-in">
-                        <div class="flex justify-between items-start mb-6">
-                            <div>
-                                <h2 class="text-2xl font-bold text-white mb-1">2. Filtro de Qualificação</h2>
-                                <p class="text-slate-400 text-sm">Validação dos pilares decisórios e financeiros.</p>
-                            </div>
-                            <button onclick="resetQualificacao()" id="btn-reset-qual" class="hidden text-xs text-slate-400 hover:text-white flex items-center gap-1 bg-slate-800 px-3 py-1.5 rounded-lg">
-                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
-                            </button>
-                        </div>
-
-                        <!-- Briefing SDR (Pré-framing Movido para Qualificação) -->
-                        <div class="bg-blue-950/20 border border-blue-900/50 rounded-xl p-5 mb-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-blue-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                                    <i data-lucide="bot" class="w-4 h-4"></i> Dados do Pré-framing (SDR) - Editável
-                                </h3>
-                                <span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-bold">Atualiza em tempo real</span>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                                <div class="flex flex-col">
-                                    <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">Nome / Ocupação</span>
-                                    <input type="text" id="icp-nome" value="Mateus (Ferramentas)" class="bg-slate-900/50 border border-slate-700 rounded p-1.5 text-xs text-white focus:border-blue-500 outline-none w-full">
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">Idade</span>
-                                    <input type="text" id="icp-idade" value="28 anos" class="bg-slate-900/50 border border-slate-700 rounded p-1.5 text-xs text-white focus:border-blue-500 outline-none w-full">
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">Meta de Ganhos Extras</span>
-                                    <input type="text" id="icp-meta" value="R$ 1.800/mês" class="bg-slate-900/50 border border-slate-700 rounded p-1.5 text-xs text-white focus:border-blue-500 outline-none w-full">
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">Capital p/ Investir</span>
-                                    <input type="text" id="icp-capital" value="R$ 1.000 (À Vista)" oninput="document.getElementById('hdr-investimento').innerText = this.value || '-'" class="bg-slate-900/50 border border-blue-500/30 rounded p-1.5 text-xs text-amber-300 font-bold focus:border-blue-500 outline-none w-full">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-6">
-                            <div id="box-decision" class="p-5 rounded-xl border bg-slate-800 border-slate-600 transition-all">
-                                <h3 class="text-sm font-bold text-white mb-4">A. Poder Decisório</h3>
-                                <div class="flex gap-4">
-                                    <button onclick="setQualDecision('yes')" id="btn-dec-yes" class="flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all">Titular da Decisão</button>
-                                    <button onclick="setQualDecision('no')" id="btn-dec-no" class="flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all">Terceirizado/Dependente</button>
-                                </div>
-                            </div>
-
-                            <div id="box-finance" class="p-5 rounded-xl border bg-slate-800 border-slate-600 hidden transition-all">
-                                <h3 class="text-sm font-bold text-white mb-4">B. Capacidade de Investimento (Puxado do Pre-framing)</h3>
-                                <div class="flex gap-4">
-                                    <button onclick="setQualFinance('yes')" id="btn-fin-yes" class="flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all">Possui Condição Real</button>
-                                    <button onclick="setQualFinance('no')" id="btn-fin-no" class="flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all">Sem Dinheiro/Viabilidade</button>
-                                </div>
-                            </div>
-
-                            <!-- Matriz de Resultados da Qualificação -->
-                            <div id="result-reagendar-decisor" class="hidden bg-blue-950/40 border border-blue-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
-                                <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
-                                    <i data-lucide="users" class="w-5 h-5"></i> Lead Sem Poder de Decisão
-                                </div>
-                                <p class="text-blue-300/70 text-xs mb-2">Ele tem capital, mas não decide sozinho. O script está bloqueado para evitar objeção final.</p>
-                                <button onclick="stopTimer('Reagendado')" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg text-xs font-bold transition-colors">Reagendar com Decisor Presente</button>
-                            </div>
-
-                            <div id="result-disqualified" class="hidden bg-red-950/40 border border-red-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
-                                <div class="flex items-center gap-2 text-red-400 font-bold text-sm">
-                                    <i data-lucide="x-circle" class="w-5 h-5"></i> Desqualificação Financeira
-                                </div>
-                                <p class="text-red-300/70 text-xs mb-2">O lead não possui viabilidade para o High Ticket. O script foi bloqueado.</p>
-                                <div class="flex gap-3">
-                                    <button onclick="stopTimer('Perdido')" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-lg text-xs font-bold transition-colors">Encerrar (Venda Perdida)</button>
-                                    <button onclick="stopTimer('Reagendado')" class="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 px-6 py-2 rounded-lg text-xs font-bold transition-colors">Reagendar (Captação Futura)</button>
-                                </div>
-                            </div>
-
-                            <div id="result-qualified" class="hidden bg-emerald-950/30 border border-emerald-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
-                                <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                                    <i data-lucide="check-circle-2" class="w-5 h-5"></i> Lead 100% Qualificado
-                                </div>
-                                <p class="text-emerald-300/70 text-xs mb-2">Decisor com capital aprovado. As próximas etapas do script foram desbloqueadas.</p>
-                                <button onclick="nextStep()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/20 animate-pulse">Avançar para o Diagnóstico</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Passo 3: Diagnóstico -->
-                    <div id="step-3" class="step-content hidden-view animate-fade-in flex flex-col h-full">
-                        <div class="mb-4">
-                            <h2 class="text-2xl font-bold text-white mb-1">3. Algoritmo de Mapeamento</h2>
-                            <p class="text-slate-400 text-sm">Faça as perguntas em ordem. A capacidade de resposta do cliente define o nível dele.</p>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                            
-                            <!-- Formulário de Mapeamento Progressivo -->
-                            <div class="space-y-4 pb-10" id="diag-form-container">
-                                
-                                <!-- Nível 1: INCS -->
-                                <div id="box-incs" class="bg-slate-800 p-4 rounded-xl border border-slate-600 transition-all">
-                                    <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
-                                        <span>1. Inconsciente (Ambição)</span>
-                                    </label>
-                                    <p class="text-sm text-white font-medium mb-3">"Quais suas expectativas com a solução X?"</p>
-                                    <textarea id="diag-q1" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Digite a resposta do cliente aqui..."></textarea>
-                                </div>
-
-                                <!-- Nível 2: CSP -->
-                                <div id="box-csp" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
-                                    <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
-                                        <span>2. Consciente do Problema (Dor)</span>
-                                    </label>
-                                    <p class="text-sm text-white font-medium mb-3">"Quais suas dificuldades em relação a solução X?"</p>
-                                    <textarea id="diag-q2" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Digite a dificuldade/dor..."></textarea>
-                                </div>
-
-                                <!-- Nível 3: CSS -->
-                                <div id="box-css" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
-                                    <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
-                                        <span>3. Consciente da Solução (Recomendação)</span>
-                                    </label>
-                                    <p class="text-sm text-white font-medium mb-3">"Você imagina alguma solução para essa dificuldade que vc enfrenta?"</p>
-                                    <textarea id="diag-q3" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Se ele souber, o que ele imagina?"></textarea>
-                                </div>
-
-                                <!-- Nível 4: CSO -->
-                                <div id="box-cso" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
-                                    <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
-                                        <span>4. Consciente do Produto</span>
-                                    </label>
-                                    <p class="text-sm text-white font-medium mb-3">"Você conhece alguem que consegue te ajudar a solucionar isso?"</p>
-                                    <textarea id="diag-q4" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Resposta do cliente..."></textarea>
-                                </div>
-
-                                <!-- Nível 5: CS -->
-                                <div id="box-cs" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
-                                    <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
-                                        <span>5. Pronto para Comprar</span>
-                                    </label>
-                                    <p class="text-sm text-white font-medium mb-3">"Se você ja sabe resolver esse problema, se é capaz de superar essa dificuldade sozinho, em que eu posso te ajudar?"</p>
-                                    <textarea id="diag-q5" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="O xeque-mate..."></textarea>
-                                </div>
-
-                            </div>
-
-                            <!-- Instrução Tática Dinâmica -->
-                            <div class="h-full sticky top-0 pt-2">
-                                <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 relative flex flex-col h-[400px]">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l-2xl"></div>
-                                    <h3 class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-2">Instrução Tática (O Que Fazer)</h3>
-                                    <p id="diag-action-text" class="text-white text-base font-medium leading-relaxed flex-1">
-                                        ESTRUTURA: Crie um plano de ação baseado na estrutura da solução que voce tem pra ele.
-                                    </p>
-                                    
-                                    <!-- Premium Feature: Action Plan Generator -->
-                                    <div class="mt-4 pt-4 border-t border-slate-700">
-                                        <h4 class="text-xs font-bold text-amber-500 mb-2 flex items-center gap-1"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Gerar Plano Estrutural IA</h4>
-                                        <input type="text" id="action-input" placeholder="Tema principal (ex: Escalabilidade)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white mb-2 focus:border-amber-500 outline-none">
-                                        <button onclick="gerarPlanoAcao()" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs py-2 rounded-lg transition-colors">Gerar Tópicos</button>
-                                        <div id="action-result" class="hidden mt-3 text-[11px] text-emerald-400 p-3 bg-emerald-950/20 border border-emerald-900/30 rounded-lg"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Passo 4: Confirmação -->
-                    <div id="step-4" class="step-content hidden-view animate-fade-in">
-                        <h2 class="text-2xl font-bold text-white mb-1">4. Consolidação Emocional</h2>
-                        <p class="text-slate-400 text-sm mb-6">Valide o problema e o desejo usando os 3 micro-acordos.</p>
-                        
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <!-- O Céu -->
-                                <div class="bg-emerald-950/20 border border-emerald-900/50 p-5 rounded-xl border-l-4 border-l-emerald-500">
-                                    <h4 class="text-emerald-400 font-bold flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">O Céu (O Sonho)</h4>
-                                    <p class="text-slate-300 font-medium text-xs leading-relaxed mb-3">
-                                        Excitar o lead. O objetivo é escavar ate que ele fale a real motivação dele que vem antes da solução.
-                                    </p>
-                                    <textarea oninput="document.getElementById('hdr-sonho').innerText = this.value || '-'" class="w-full bg-slate-900/50 border border-emerald-900/50 rounded-lg p-2 text-xs text-slate-200 focus:border-emerald-500 outline-none resize-none h-14" placeholder="Anote a motivação real (sonho) descoberta aqui..."></textarea>
-                                </div>
-
-                                <!-- O Inferno -->
-                                <div class="bg-red-950/20 border border-red-900/50 p-5 rounded-xl border-l-4 border-l-red-500">
-                                    <h4 class="text-red-400 font-bold flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">O Inferno (A Transformação)</h4>
-                                    <p class="text-slate-300 font-medium text-xs leading-relaxed mb-3">
-                                        Fazê-lo enxergar de forma sutil a ineficiência de ficar parado onde está. Escave ate achar qual é a transformação.
-                                    </p>
-                                    <textarea oninput="document.getElementById('hdr-transformacao').innerText = this.value || '-'" class="w-full bg-slate-900/50 border border-red-900/50 rounded-lg p-2 text-xs text-slate-200 focus:border-red-500 outline-none resize-none h-14" placeholder="Anote a ineficiência/transformação descoberta aqui..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Passo 4: Confirmação -->
-                    <div id="step-4" class="step-content hidden-view animate-fade-in">
-                        <h2 class="text-2xl font-bold text-white mb-1">4. Consolidação Emocional</h2>
-                        <p class="text-slate-400 text-sm mb-6">Valide o problema e o desejo usando os 3 micro-acordos.</p>
-                        
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <div class="bg-emerald-950/20 border border-emerald-900/50 p-5 rounded-xl border-l-4 border-l-emerald-500">
-                                    <h4 class="text-emerald-400 font-bold flex items-center gap-2 mb-1 text-xs uppercase tracking-wider">O Céu (O Sonho)</h4>
-                                    <p class="text-slate-300 font-medium text-sm leading-relaxed">
-                                        Excitar o lead. O objetivo é escavar até que ele fale a real motivação dele que vem antes da solução.
-                                    </p>
-                                </div>
-                                <div class="bg-red-950/20 border border-red-900/50 p-5 rounded-xl border-l-4 border-l-red-500">
-                                    <h4 class="text-red-400 font-bold flex items-center gap-2 mb-1 text-xs uppercase tracking-wider">O Inferno (A Transformação)</h4>
-                                    <p class="text-slate-300 font-medium text-sm leading-relaxed">
-                                        Fazê-lo enxergar de forma sutil a ineficiência de ficar parado onde está. Escave até achar qual é a transformação.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
-                                <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider mb-4">Framework "3 SIMs"</h3>
-                                <div class="space-y-3" id="checks-container">
-                                    <!-- Checks via JS -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Passo 5: Negociação -->
-                    <div id="step-5" class="step-content hidden-view animate-fade-in">
-                        <h2 class="text-2xl font-bold text-white mb-1">5. Negociação e Ancoragem</h2>
-                        <p class="text-slate-400 text-sm mb-6">Crie a disparidade entre o valor percebido e o preço cobrado.</p>
-
-                        <!-- Dinâmica Vinda do Diagnóstico (Passo 3) -->
-                        <div class="bg-blue-950/20 border border-blue-900/50 rounded-xl p-4 mb-6 flex items-center gap-3 border-l-4 border-l-blue-500">
-                            <i data-lucide="info" class="text-blue-400 w-5 h-5"></i>
-                            <div>
-                                <p class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Atenção - Conexão Lógica (Diagnóstico)</p>
-                                <p id="recom-produto" class="text-xs text-slate-300">Aguardando diagnóstico do Nível 3 (CSS)...</p>
-                            </div>
-                        </div>
-
-                        <!-- Premium Tool: Calculadora -->
-                        <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl mb-6 flex gap-4 items-end">
-                            <div class="flex-1">
-                                <label class="text-[10px] text-slate-500 uppercase font-bold block mb-1">Valor da Solução (Ex: Sua Hora)</label>
-                                <input type="number" id="calc-hora" placeholder="R$ 1000" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white focus:border-amber-500 outline-none">
-                            </div>
-                            <div class="flex-1">
-                                <label class="text-[10px] text-slate-500 uppercase font-bold block mb-1">Multiplicador (Ex: Horas)</label>
-                                <input type="number" id="calc-mult" placeholder="12" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white focus:border-amber-500 outline-none">
-                            </div>
-                            <button onclick="calcularAncoragem()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-lg font-bold text-sm hover:bg-amber-400">Calcular</button>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
-                                <span class="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-2 block">Passo 1</span>
-                                <h4 class="text-white text-base font-bold mb-2">Ancoragem da Solução</h4>
-                                <p class="text-xs text-slate-400 leading-relaxed mb-4">Faça uma ancoragem de valor baseada no custo da solução.</p>
-                                <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700/50 text-xs text-slate-300 italic">
-                                    <strong class="text-amber-500 not-italic">EX:</strong> "Se a sua hora hoje custa <span id="ancora-1-hora">1 mil</span> reais, então 12 horas suas valem <span id="ancora-1-total">12 mil</span>, crie um acompanhamento de x meses por apenas <span id="ancora-1-venda">4 mil</span>."
-                                </div>
-                            </div>
-                            <div class="bg-gradient-to-br from-amber-900/20 to-slate-800 border border-slate-700 rounded-xl p-6">
-                                <span class="text-amber-500 text-[10px] font-bold uppercase tracking-wider mb-2 block">Passo 2</span>
-                                <h4 class="text-white text-base font-bold mb-2">Ancoragem da Transformação</h4>
-                                <p class="text-xs text-slate-400 leading-relaxed mb-4">Faça uma ancoragem de valor baseada no custo da transformação.</p>
-                                <div class="bg-amber-950/30 p-3 rounded-lg border border-amber-900/30 text-xs text-slate-300 italic">
-                                    <strong class="text-amber-500 not-italic">EX:</strong> "Se a transformação dele é um veículo de 100 mil, Faça ele admitir que não tem condição para adquirir hoje, mas que com sua solução ele terá essa condição em X dias."
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Passo 6: Fechamento -->
-                    <div id="step-6" class="step-content hidden-view animate-fade-in">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h2 class="text-2xl font-bold text-white mb-1">6. Fechamento e Objeções</h2>
-                                <p class="text-slate-400 text-sm">O silêncio é a arma. Controle o nervosismo.</p>
-                            </div>
-                            <!-- Premium Integration -->
-                            <button class="bg-white text-slate-900 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-lg hover:bg-slate-200">
-                                <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i> Integrar Agenda
-                            </button>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div class="bg-slate-800 border-l-4 border-amber-500 rounded-r-xl p-6 shadow-lg h-fit">
-                                <h3 class="text-amber-500 text-xs font-bold uppercase tracking-wider mb-2">Comando Final</h3>
-                                <p class="text-white text-lg font-medium leading-tight">
-                                    Faça a oferta de forma direta e <br/>
-                                    <strong class="text-amber-400 text-2xl font-black uppercase tracking-wide mt-2 block">Fique em Silêncio.</strong>
-                                </p>
-                            </div>
-                            
-                            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
-                                <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Banco Completo de Objeções (PRO)</h3>
-                                <div class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    <div class="border border-slate-800 bg-slate-800/50 rounded-lg p-3">
-                                        <h5 class="font-bold text-slate-200 text-xs mb-1">1. Financeira (Está caro / Sem $)</h5>
-                                        <p class="text-[11px] text-slate-400">Isole a objeção: "Tirando a questão do valor, tem algo mais que te impede de avançar hoje?"</p>
-                                    </div>
-                                    <div class="border border-slate-800 bg-slate-800/50 rounded-lg p-3">
-                                        <h5 class="font-bold text-slate-200 text-xs mb-1">2. Insegurança (Vou pensar)</h5>
-                                        <p class="text-[11px] text-slate-400">Drible: "Geralmente quem diz isso ficou com alguma dúvida. O que faltou esclarecer pra você?"</p>
-                                    </div>
-                                    <div class="border border-slate-800 bg-slate-800/50 rounded-lg p-3">
-                                        <h5 class="font-bold text-slate-200 text-xs mb-1">3. Terceiros (Falar com sócio/esposa)</h5>
-                                        <p class="text-[11px] text-slate-400">Contorno: "Entendo. Mas se dependesse 100% de você agora, qual seria a sua decisão?"</p>
-                                    </div>
-                                    <div class="border border-slate-800 bg-slate-800/50 rounded-lg p-3">
-                                        <h5 class="font-bold text-slate-200 text-xs mb-1">4. Garantia (E se não funcionar?)</h5>
-                                        <p class="text-[11px] text-slate-400">Reforço lógico: "Por isso temos a garantia condicional baseada na aplicação do plano estrutural."</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div id="login-error" class="hidden bg-red-500/10 border border-red-500/50 text-red-500 text-xs p-3 rounded-lg text-center font-medium">
+                    Credenciais inválidas. Verifique seu acesso.
                 </div>
 
-                <!-- Footer Navigation -->
-                <div class="border-t border-slate-800 p-4 bg-slate-900/90 backdrop-blur-md flex justify-between items-center shrink-0">
-                    <button onclick="prevStep()" id="btn-prev" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-white transition-colors cursor-not-allowed" disabled>
-                        Voltar Etapa
-                    </button>
-                    <button onclick="nextStep()" id="btn-next" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-lg text-sm font-bold transition-colors flex items-center gap-2 shadow-lg">
-                        Próximo Passo <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    </button>
-                    
-                    <div id="finish-actions" class="hidden flex gap-2">
-                        <button onclick="stopTimer('Perdido')" class="bg-slate-800 hover:bg-red-900/50 text-red-500 border border-slate-700 hover:border-red-500/50 px-4 py-2 rounded-lg text-xs font-bold transition-colors">
-                            <i data-lucide="x" class="w-3.5 h-3.5 inline"></i> Perdido
-                        </button>
-                        <button onclick="stopTimer('Reagendado')" class="bg-slate-800 hover:bg-blue-900/50 text-blue-400 border border-slate-700 hover:border-blue-500/50 px-4 py-2 rounded-lg text-xs font-bold transition-colors">
-                            <i data-lucide="calendar" class="w-3.5 h-3.5 inline"></i> Reagendar
-                        </button>
-                        <button onclick="stopTimer('Ganho')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/20">
-                            <i data-lucide="trophy" class="w-4 h-4 inline mr-1"></i> Venda Ganha!
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Modal Relatório ICP -->
-    <div id="modal-relatorio" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl">
-            <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-800/50 rounded-t-2xl">
-                <h3 class="text-white font-bold flex items-center gap-2"><i data-lucide="database" class="text-amber-500 w-5 h-5"></i> Dossiê ICP do Lead</h3>
-                <button onclick="fecharRelatorio()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
-                <textarea id="relatorio-texto" class="w-full h-full min-h-[400px] bg-slate-950 border border-slate-700 rounded-xl p-4 text-sm text-emerald-400 font-mono focus:outline-none resize-none" readonly></textarea>
-            </div>
-            <div class="p-4 border-t border-slate-800 flex justify-end">
-                <button onclick="copiarRelatorio()" class="bg-amber-500 text-slate-900 px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-amber-400 transition-colors">
-                    <i data-lucide="copy" class="w-4 h-4"></i> Copiar Dossiê
+                <button type="submit" id="btn-entrar" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold py-3 rounded-lg shadow-lg transition-all mt-4 flex justify-center items-center gap-2">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> Acessar Sistema
                 </button>
+            </form>
+            <div class="mt-6 text-center text-[10px] text-slate-600 uppercase tracking-widest font-semibold">
+                Plataforma de Alta Performance
             </div>
         </div>
     </div>
 
+    <!-- MAIN APP CONTAINER (Oculto até login) -->
+    <div id="app-container" class="hidden-view flex flex-col h-full w-full">
+        <!-- Notificações do Sistema -->
+        <div id="system-toast" class="fixed top-20 right-4 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-2xl transform translate-x-full opacity-0 transition-all duration-300 z-50 flex items-center gap-3 border border-slate-700">
+            <div id="system-toast-icon" class="text-emerald-500"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
+            <span id="system-toast-msg" class="text-sm font-medium">Sucesso!</span>
+        </div>
+
+        <!-- Header -->
+        <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-30 flex-shrink-0 shadow-lg">
+            <div class="max-w-[1400px] mx-auto flex justify-between items-center gap-4">
+                <div class="flex items-center gap-6">
+                    <div>
+                        <h1 class="text-xl font-bold text-white tracking-tight flex items-center gap-3">
+                            XTREMA
+                            <span class="bg-amber-500 text-slate-900 text-[10px] px-2 py-0.5 rounded font-black tracking-wider uppercase">PRO PILOTO</span>
+                        </h1>
+                    </div>
+                    <!-- Nav top -->
+                    <div class="hidden md:flex gap-2">
+                        <button onclick="goToView('dashboard')" id="btn-nav-dash" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-slate-800 text-slate-300 hover:text-white">Dashboard</button>
+                        <button onclick="goToView('sdr')" id="btn-nav-sdr" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-slate-800 text-slate-300 hover:text-white">Script SDR (WhatsApp)</button>
+                        <button onclick="goToView('flow')" id="btn-nav-flow" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-amber-500/20 text-amber-500 border border-amber-500/30">Fluxo da Call</button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <button onclick="gerarRelatorioICP()" id="btn-relatorio-call" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-500 border border-amber-500/30 px-3 py-2 rounded-lg text-xs font-bold items-center gap-2 transition-colors cursor-pointer shadow-lg shadow-amber-900/20" title="Copiar Dossiê ICP para Planilha">
+                        <i data-lucide="clipboard-copy" class="w-3.5 h-3.5"></i> Copiar ICP
+                    </button>
+                    <div class="text-right hidden md:block">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Tempo de Call</p>
+                        <p id="call-timer" class="text-lg font-mono font-bold text-amber-500 leading-none">00:00</p>
+                    </div>
+                    <button id="btn-timer" class="bg-slate-800 text-slate-500 border border-slate-700 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 cursor-default">
+                        <i data-lucide="clock" class="w-3.5 h-3.5"></i> Aguardando
+                    </button>
+                    
+                    <!-- Botão de Sair (Logout) -->
+                    <button id="btn-logout" class="ml-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-red-400 p-2 rounded-lg transition-colors border border-slate-700" title="Sair do Sistema">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Painel Tático Estático (Visível apenas na Call) -->
+            <div id="static-insight-panel" class="max-w-[1400px] mx-auto mt-4 grid-cols-6 gap-2 hidden transition-all duration-300">
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-amber-500/30 shadow-inner flex flex-col justify-center">
+                    <span class="text-[9px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">Nível de Consciência</span>
+                    <span id="hdr-nivel" class="text-white text-[11px] font-medium truncate">1. Inconsciente</span>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
+                    <span class="text-[9px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Ambição</span>
+                    <span id="hdr-ambicao" class="text-slate-300 text-[11px] font-medium truncate" title="Aguardando...">-</span>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
+                    <span class="text-[9px] text-red-400 font-bold uppercase tracking-wider mb-0.5">Dor / Problema</span>
+                    <span id="hdr-dor" class="text-slate-300 text-[11px] font-medium truncate" title="Aguardando...">-</span>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
+                    <span class="text-[9px] text-blue-400 font-bold uppercase tracking-wider mb-0.5">O Sonho (Céu)</span>
+                    <span id="hdr-sonho" class="text-slate-300 text-[11px] font-medium truncate" title="Aguardando...">-</span>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
+                    <span class="text-[9px] text-purple-400 font-bold uppercase tracking-wider mb-0.5">A Transformação</span>
+                    <span id="hdr-transformacao" class="text-slate-300 text-[11px] font-medium truncate" title="Aguardando...">-</span>
+                </div>
+                <div class="bg-slate-950 p-2.5 rounded-lg border border-amber-500/30 shadow-inner flex flex-col justify-center">
+                    <span class="text-[9px] text-amber-300 font-bold uppercase tracking-wider mb-0.5">Investimento (Pré)</span>
+                    <span id="hdr-investimento" class="text-white text-[11px] font-bold truncate">-</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 flex overflow-hidden max-w-[1400px] w-full mx-auto">
+            
+            <!-- Dashboard View -->
+            <div id="view-dashboard" class="hidden-view w-full p-6 overflow-y-auto">
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Dashboard Operacional</h2>
+                        <p class="text-slate-400 text-sm">Métricas e performance das suas conversões.</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 relative overflow-hidden">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Calls Feitas</p>
+                        <h3 id="dash-calls" class="text-2xl font-black text-white">0</h3>
+                    </div>
+                    <div class="bg-slate-800/50 border border-emerald-900/50 rounded-xl p-4 relative overflow-hidden">
+                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider mb-1">Vendas (Ganhas)</p>
+                        <h3 id="dash-ganhas" class="text-2xl font-black text-emerald-400">0</h3>
+                    </div>
+                    <div class="bg-slate-800/50 border border-red-900/50 rounded-xl p-4 relative overflow-hidden">
+                        <p class="text-[10px] text-red-500 font-bold uppercase tracking-wider mb-1">Perdidas (Loss)</p>
+                        <h3 id="dash-perdidas" class="text-2xl font-black text-red-400">0</h3>
+                    </div>
+                    <div class="bg-slate-800/50 border border-blue-900/50 rounded-xl p-4 relative overflow-hidden">
+                        <p class="text-[10px] text-blue-500 font-bold uppercase tracking-wider mb-1">Reagendadas</p>
+                        <h3 id="dash-reagendadas" class="text-2xl font-black text-blue-400">0</h3>
+                    </div>
+                    <div class="bg-slate-800/50 border border-amber-900/50 rounded-xl p-4 relative overflow-hidden">
+                        <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-1">Conversão (Win Rate)</p>
+                        <h3 id="dash-taxa" class="text-2xl font-black text-amber-400">0%</h3>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 relative">
+                    <div class="flex items-center gap-2 mb-4">
+                        <h3 class="text-sm font-bold text-white">Histórico Recente de Calls (CRM)</h3>
+                        <span id="crm-status" class="bg-amber-500/20 text-amber-500 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1"><i data-lucide="wifi" class="w-3 h-3"></i> Sincronizando...</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-400">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th class="px-4 py-3 rounded-tl-lg">Data</th>
+                                    <th class="px-4 py-3">Tempo</th>
+                                    <th class="px-4 py-3">Nível Consciência</th>
+                                    <th class="px-4 py-3">Ticket Proposto</th>
+                                    <th class="px-4 py-3 rounded-tr-lg">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crm-table-body" class="divide-y divide-slate-700/50">
+                                <tr>
+                                    <td colspan="5" class="px-4 py-8 text-center text-slate-500 italic">Nenhuma call registrada ainda. Inicie uma nova call.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Script SDR View -->
+            <div id="view-sdr" class="hidden-view w-full p-6 overflow-y-auto animate-fade-in">
+                <div class="mb-6 flex justify-between items-end">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Playbook SDR • Pré-framing WhatsApp</h2>
+                        <p class="text-slate-400 text-sm">Scripts de qualificação e agendamento. Clique nos blocos para copiar.</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-20">
+                    <!-- PARTE 1 -->
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-full">
+                        <div class="bg-slate-800 p-3 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider">Parte 1: Abertura</h3>
+                            <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-bold">1º Contato</span>
+                        </div>
+                        <div class="p-4 space-y-4 flex-1">
+                            <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group">
+                                <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
+                                <p class="text-xs text-slate-300 pr-6 copy-target">2 milhões e meio feitos até agora pelos novos alunos... Hoje o dia vai ser espetacular [Nome], tudo bom?<br><br>Vou te fazer algumas perguntas sobre seu Objetivo aqui... Isso nós ajuda a resolver as dificuldades que você possa enfrentar sem perda de tempo. Tudo bem?!<br><br>Qual a sua idade?<br><br>Pra eu entender seu momento: Hoje você trabalha em qual empresa?</p>
+                            </div>
+                            
+                            <div class="border-t border-slate-800 pt-3">
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Desvio: Caso queira suporte</p>
+                                <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group">
+                                    <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
+                                    <p class="text-xs text-slate-300 pr-6 copy-target">Eu tb quero resolver, inclusive ao vivo. Mas antes preciso entender como te ajudar?! Vou te enviar assim que terminar de fazer as perguntas, combinado?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PARTE 2 -->
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-full">
+                        <div class="bg-slate-800 p-3 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider">Parte 2: Qualificação</h3>
+                            <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-bold">Condição</span>
+                        </div>
+                        <div class="p-4 space-y-4 flex-1">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="border border-slate-700 rounded-lg p-2 hover:border-slate-500 transition-colors">
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Se não trabalha</p>
+                                    <div onclick="copyText(this)" class="text-[11px] text-slate-300 cursor-pointer hover:text-amber-400 copy-target">Poxa, entendi seu ponto [Nome]! E de onde vem a renda que você está investindo nesse momento?</div>
+                                </div>
+                                <div class="border border-slate-700 rounded-lg p-2 hover:border-slate-500 transition-colors">
+                                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Se trabalha</p>
+                                    <div onclick="copyText(this)" class="text-[11px] text-slate-300 cursor-pointer hover:text-amber-400 copy-target">Poxa, legal demais [Nome]! E quanto você quer ganhar acima do que ja tira ai?</div>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-slate-800 pt-3">
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Após responder sobre ganhos</p>
+                                <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group mb-2">
+                                    <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
+                                    <p class="text-[11px] text-slate-400 mb-1 font-bold text-red-400">Se NÃO der números sólidos:</p>
+                                    <p class="text-xs text-slate-300 pr-6 copy-target">Massa, mas ainda sim você não pensa em ganhar nada além do seu trabalho?</p>
+                                </div>
+                                <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group">
+                                    <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
+                                    <p class="text-[11px] text-slate-400 mb-1 font-bold text-emerald-400">Se DER números sólidos:</p>
+                                    <p class="text-xs text-slate-300 pr-6 copy-target">Massa, sair da área de [Emprego atual] para focar no Drop ganhando R$ [Meta]/mês é um excelente objetivo. Dá uma tranquilidade muito boa pra fazer essa transição com calma!<br><br>Inclusive... Quanto você vai investir no Drop para alcançar esse faturamento?<br><br>E esse valor está reservado em dinheiro guardado a vista ou cartão de credito?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PARTE 3 -->
+                    <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-full">
+                        <div class="bg-slate-800 p-3 border-b border-slate-700 flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-amber-500 uppercase tracking-wider">Parte 3: Agendamento</h3>
+                            <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-bold">Conversão</span>
+                        </div>
+                        <div class="p-4 space-y-4 flex-1">
+                            <div class="border-b border-slate-800 pb-3">
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Filtro Final de Verba</p>
+                                <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group mb-2">
+                                    <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
+                                    <p class="text-[11px] text-slate-400 mb-1 font-bold text-red-400">Se NÃO tem verba:</p>
+                                    <p class="text-xs text-slate-300 pr-6 copy-target">Nem R$120,00 reais guardados vc tem pra investir? dá até pra começar sim, mas como o orçamento é enxuto, a gente precisa escolher a estratégia certa pra chegar nos R$ [Meta]...</p>
+                                </div>
+                                <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/50 p-3 rounded-lg cursor-pointer transition-colors relative group">
+                                    <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
+                                    <p class="text-[11px] text-slate-400 mb-1 font-bold text-emerald-400">Se TEM capital:</p>
+                                    <p class="text-xs text-slate-300 pr-6 copy-target">Antes de você tomar qualquer decisão, o ideal é a gente trocar uma ideia rápida de 15 minutos no whatsapp pra olhar o seu caso e ver se realmente é viável pra você rodar essa loja agora.</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-2">Pitch e Follow Up</p>
+                                <div onclick="copyText(this)" class="bg-blue-950/20 hover:bg-blue-900/30 border border-blue-900/50 p-3 rounded-lg cursor-pointer transition-colors relative group mb-2">
+                                    <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-blue-400"></i>
+                                    <p class="text-xs text-slate-300 pr-6 copy-target">Posso te ligar ou prefere agendar uma call de Diagnostico e Analise de loja?<br><br>Tem tempo disponível hoje ou amanhã?</p>
+                                </div>
+                                <div onclick="copyText(this)" class="bg-slate-800/50 hover:bg-slate-800 border border-slate-700 p-3 rounded-lg cursor-pointer transition-colors relative group">
+                                    <i data-lucide="copy" class="w-4 h-4 text-slate-500 absolute top-3 right-3 group-hover:text-amber-500"></i>
+                                    <p class="text-[11px] text-slate-400 mb-1 font-bold text-amber-500">Confirmação (Follow Up):</p>
+                                    <p class="text-xs text-slate-300 pr-6 copy-target">Tá confirmado: seu horário, hoje às [Horário]. Passando pra avisar que sua presença é muito importante. Estamos combinados?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Toast Notification -->
+                <div id="toast" class="fixed bottom-4 right-4 bg-emerald-500 text-slate-900 px-4 py-2 rounded-lg font-bold text-sm shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> Script copiado!
+                </div>
+            </div>
+
+            <!-- Flow View (Split Layout) -->
+            <div id="view-flow" class="w-full h-full flex flex-col md:flex-row animate-fade-in">
+                
+                <!-- Left: Sidebar Navigation -->
+                <div class="w-full md:w-64 bg-slate-900/80 border-r border-slate-800 flex-shrink-0 overflow-y-auto p-4 flex flex-col z-10">
+                    
+                    <button onclick="iniciarNovaCall()" id="btn-start-call-sidebar" class="mb-6 w-full bg-amber-500 text-slate-900 px-4 py-3 rounded-xl font-bold text-sm shadow-lg hover:bg-amber-400 transition-all flex items-center justify-center gap-2 animate-pulse">
+                        <i data-lucide="play" class="w-4 h-4"></i> Iniciar Nova Call
+                    </button>
+
+                    <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-2">Roadmap da Call</h2>
+                    <nav id="sidebar-nav" class="flex md:flex-col gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
+                        <!-- Nav items generated via JS -->
+                    </nav>
+                </div>
+
+                <!-- Center: Step Content Area -->
+                <div class="flex-1 bg-slate-950 flex flex-col relative overflow-hidden">
+                    <div id="views-container" class="flex-1 overflow-y-auto p-6 lg:p-8">
+                        
+                        <!-- Passo 1: Rapport & Pre-framing -->
+                        <div id="step-1" class="step-content animate-fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-1">1. Rapport & Setup</h2>
+                            <p class="text-slate-400 text-sm mb-6">Controle o frame utilizando o briefing gerado pelo SDR/Bot.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                                    <h4 class="text-white text-sm font-bold mb-1">Ancoragem de Contexto</h4>
+                                    <p class="text-xs text-slate-400">Use o briefing para conectar: "Vi aqui que você trabalha com ferramentas e quer levantar uns 1.8k a mais no mês..."</p>
+                                </div>
+                                <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+                                    <h4 class="text-white text-sm font-bold mb-1">Escuta Ativa Primária</h4>
+                                    <p class="text-xs text-slate-400">Capte o tom de voz. Comece a anotar palavras-chave no Smart CRM ao lado.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 2: Qualificação -->
+                        <div id="step-2" class="step-content hidden-view animate-fade-in">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-white mb-1">2. Filtro de Qualificação</h2>
+                                    <p class="text-slate-400 text-sm">Validação dos pilares decisórios e financeiros.</p>
+                                </div>
+                                <button onclick="resetQualificacao()" id="btn-reset-qual" class="hidden text-xs text-slate-400 hover:text-white flex items-center gap-1 bg-slate-800 px-3 py-1.5 rounded-lg">
+                                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+                                </button>
+                            </div>
+
+                            <!-- Briefing SDR -->
+                            <div class="bg-blue-950/20 border border-blue-900/50 rounded-xl p-5 mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-blue-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                                        <i data-lucide="bot" class="w-4 h-4"></i> Dados do Pré-framing (SDR) - Editável
+                                    </h3>
+                                    <span class="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-bold">Atualiza em tempo real</span>
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">Nome / Ocupação</span>
+                                        <input type="text" id="icp-nome" value="Mateus (Ferramentas)" class="bg-slate-900/50 border border-slate-700 rounded p-1.5 text-xs text-white focus:border-blue-500 outline-none w-full">
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">Idade</span>
+                                        <input type="text" id="icp-idade" value="28 anos" class="bg-slate-900/50 border border-slate-700 rounded p-1.5 text-xs text-white focus:border-blue-500 outline-none w-full">
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">Meta de Ganhos Extras</span>
+                                        <input type="text" id="icp-meta" value="R$ 1.800/mês" class="bg-slate-900/50 border border-slate-700 rounded p-1.5 text-xs text-white focus:border-blue-500 outline-none w-full">
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-500 text-[10px] font-bold uppercase mb-1">Capital p/ Investir</span>
+                                        <input type="text" id="icp-capital" value="R$ 1.000 (À Vista)" oninput="document.getElementById('hdr-investimento').innerText = this.value || '-'" class="bg-slate-900/50 border border-blue-500/30 rounded p-1.5 text-xs text-amber-300 font-bold focus:border-blue-500 outline-none w-full">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div id="box-decision" class="p-5 rounded-xl border bg-slate-800 border-slate-600 transition-all">
+                                    <h3 class="text-sm font-bold text-white mb-4">A. Poder Decisório</h3>
+                                    <div class="flex gap-4">
+                                        <button onclick="setQualDecision('yes')" id="btn-dec-yes" class="flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all">Titular da Decisão</button>
+                                        <button onclick="setQualDecision('no')" id="btn-dec-no" class="flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all">Terceirizado/Dependente</button>
+                                    </div>
+                                </div>
+
+                                <div id="box-finance" class="p-5 rounded-xl border bg-slate-800 border-slate-600 hidden transition-all">
+                                    <h3 class="text-sm font-bold text-white mb-4">B. Capacidade de Investimento (Puxado do Pre-framing)</h3>
+                                    <div class="flex gap-4">
+                                        <button onclick="setQualFinance('yes')" id="btn-fin-yes" class="flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all">Possui Condição Real</button>
+                                        <button onclick="setQualFinance('no')" id="btn-fin-no" class="flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all">Sem Dinheiro/Viabilidade</button>
+                                    </div>
+                                </div>
+
+                                <!-- Matriz de Resultados da Qualificação -->
+                                <div id="result-reagendar-decisor" class="hidden bg-blue-950/40 border border-blue-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
+                                    <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
+                                        <i data-lucide="users" class="w-5 h-5"></i> Lead Sem Poder de Decisão (Mas com Verba)
+                                    </div>
+                                    <p class="text-blue-300/70 text-xs mb-2">Ele tem capital, mas não decide sozinho. O script está bloqueado para evitar objeção final.</p>
+                                    <button onclick="stopTimer('Reagendado')" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg text-xs font-bold transition-colors shadow-lg shadow-blue-900/20">Reagendar com Decisor Presente</button>
+                                </div>
+
+                                <div id="result-disqualified" class="hidden bg-red-950/40 border border-red-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
+                                    <div class="flex items-center gap-2 text-red-400 font-bold text-sm">
+                                        <i data-lucide="x-circle" class="w-5 h-5"></i> Desqualificação Financeira
+                                    </div>
+                                    <p class="text-red-300/70 text-xs mb-2">O lead não possui viabilidade para o High Ticket. O script foi bloqueado.</p>
+                                    <div class="flex gap-3">
+                                        <button onclick="stopTimer('Perdido')" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-lg text-xs font-bold transition-colors shadow-lg shadow-red-900/20">Encerrar (Venda Perdida)</button>
+                                        <button onclick="stopTimer('Reagendado')" class="bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 px-6 py-2 rounded-lg text-xs font-bold transition-colors">Reagendar (Captação Futura)</button>
+                                    </div>
+                                </div>
+
+                                <div id="result-qualified" class="hidden bg-emerald-950/30 border border-emerald-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
+                                    <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                                        <i data-lucide="check-circle-2" class="w-5 h-5"></i> Lead 100% Qualificado
+                                    </div>
+                                    <p class="text-emerald-300/70 text-xs mb-2">Decisor com capital aprovado. As próximas etapas do script foram desbloqueadas.</p>
+                                    <button onclick="nextStep()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/20 animate-pulse">Avançar para o Diagnóstico</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 3: Diagnóstico -->
+                        <div id="step-3" class="step-content hidden-view animate-fade-in flex flex-col h-full">
+                            <div class="mb-4">
+                                <h2 class="text-2xl font-bold text-white mb-1">3. Algoritmo de Mapeamento</h2>
+                                <p class="text-slate-400 text-sm">Faça as perguntas em ordem. A capacidade de resposta define o nível dele.</p>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                                
+                                <div class="space-y-4 pb-10" id="diag-form-container">
+                                    <div id="box-incs" class="bg-slate-800 p-4 rounded-xl border border-slate-600 transition-all">
+                                        <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
+                                            <span>1. Inconsciente (Ambição)</span>
+                                        </label>
+                                        <p class="text-sm text-white font-medium mb-3">"Quais suas expectativas com a solução X?"</p>
+                                        <textarea id="diag-q1" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Digite a resposta do cliente aqui..."></textarea>
+                                    </div>
+                                    <div id="box-csp" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
+                                        <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
+                                            <span>2. Consciente do Problema (Dor)</span>
+                                        </label>
+                                        <p class="text-sm text-white font-medium mb-3">"Quais suas dificuldades em relação a solução X?"</p>
+                                        <textarea id="diag-q2" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Digite a dificuldade/dor..."></textarea>
+                                    </div>
+                                    <div id="box-css" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
+                                        <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
+                                            <span>3. Consciente da Solução (Recomendação)</span>
+                                        </label>
+                                        <p class="text-sm text-white font-medium mb-3">"Você imagina alguma solução para essa dificuldade que vc enfrenta?"</p>
+                                        <textarea id="diag-q3" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Se ele souber, o que ele imagina?"></textarea>
+                                    </div>
+                                    <div id="box-cso" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
+                                        <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
+                                            <span>4. Consciente do Produto</span>
+                                        </label>
+                                        <p class="text-sm text-white font-medium mb-3">"Você conhece alguem que consegue te ajudar a solucionar isso?"</p>
+                                        <textarea id="diag-q4" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Resposta do cliente..."></textarea>
+                                    </div>
+                                    <div id="box-cs" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
+                                        <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
+                                            <span>5. Pronto para Comprar</span>
+                                        </label>
+                                        <p class="text-sm text-white font-medium mb-3">"Se você ja sabe resolver esse problema sozinho, em que eu posso te ajudar?"</p>
+                                        <textarea id="diag-q5" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="O xeque-mate..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="h-full sticky top-0 pt-2 space-y-4">
+                                    <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-6 relative flex flex-col min-h-[250px]">
+                                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l-2xl"></div>
+                                        <h3 class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-2">Instrução Tática (O Que Fazer)</h3>
+                                        <p id="diag-action-text" class="text-white text-base font-medium leading-relaxed flex-1">
+                                            ESTRUTURA: Crie um plano de ação baseado na estrutura da solução que voce tem pra ele.
+                                        </p>
+                                        <div class="mt-4 pt-4 border-t border-slate-700">
+                                            <h4 class="text-xs font-bold text-amber-500 mb-2 flex items-center gap-1"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Gerar Plano Estrutural IA</h4>
+                                            <input type="text" id="action-input" placeholder="Tema principal (ex: Escalabilidade)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white mb-2 focus:border-amber-500 outline-none">
+                                            <button onclick="gerarPlanoAcao()" class="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs py-2 rounded-lg transition-colors">Gerar Tópicos</button>
+                                            <div id="action-result" class="hidden mt-3 text-[11px] text-emerald-400 p-3 bg-emerald-950/20 border border-emerald-900/30 rounded-lg"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-4 flex flex-col">
+                                        <h3 class="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-2"><i data-lucide="edit-3" class="w-3 h-3 inline mr-1"></i> Bloco de Anotações Livres</h3>
+                                        <textarea id="client-notes" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-32" placeholder="Despeje as informações avulsas do cliente aqui..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 4: Confirmação -->
+                        <div id="step-4" class="step-content hidden-view animate-fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-1">4. Consolidação Emocional</h2>
+                            <p class="text-slate-400 text-sm mb-6">Valide o problema e o desejo usando os 3 micro-acordos.</p>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div class="bg-emerald-950/20 border border-emerald-900/50 p-5 rounded-xl border-l-4 border-l-emerald-500">
+                                        <h4 class="text-emerald-400 font-bold flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">O Céu (O Sonho)</h4>
+                                        <p class="text-slate-300 font-medium text-xs leading-relaxed mb-3">
+                                            Excitar o lead. O objetivo é escavar ate que ele fale a real motivação dele que vem antes da solução.
+                                        </p>
+                                        <textarea oninput="document.getElementById('hdr-sonho').innerText = this.value || '-'" class="w-full bg-slate-900/50 border border-emerald-900/50 rounded-lg p-2 text-xs text-slate-200 focus:border-emerald-500 outline-none resize-none h-14" placeholder="Anote a motivação real (sonho) descoberta aqui..."></textarea>
+                                    </div>
+                                    <div class="bg-red-950/20 border border-red-900/50 p-5 rounded-xl border-l-4 border-l-red-500">
+                                        <h4 class="text-red-400 font-bold flex items-center gap-2 mb-2 text-xs uppercase tracking-wider">O Inferno (A Transformação)</h4>
+                                        <p class="text-slate-300 font-medium text-xs leading-relaxed mb-3">
+                                            Fazê-lo enxergar de forma sutil a ineficiência de ficar parado onde está. Escave ate achar qual é a transformação.
+                                        </p>
+                                        <textarea oninput="document.getElementById('hdr-transformacao').innerText = this.value || '-'" class="w-full bg-slate-900/50 border border-red-900/50 rounded-lg p-2 text-xs text-slate-200 focus:border-red-500 outline-none resize-none h-14" placeholder="Anote a ineficiência/transformação descoberta aqui..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5">
+                                    <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider mb-4">Framework "3 SIMs"</h3>
+                                    <div class="space-y-3" id="checks-container">
+                                        <!-- Checks via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 5: Negociação -->
+                        <div id="step-5" class="step-content hidden-view animate-fade-in">
+                            <h2 class="text-2xl font-bold text-white mb-1">5. Negociação e Ancoragem</h2>
+                            <p class="text-slate-400 text-sm mb-6">Crie a disparidade entre o valor percebido e o preço cobrado.</p>
+
+                            <div class="bg-blue-950/20 border border-blue-900/50 rounded-xl p-4 mb-6 flex items-center gap-3 border-l-4 border-l-blue-500">
+                                <i data-lucide="info" class="text-blue-400 w-5 h-5"></i>
+                                <div>
+                                    <p class="text-[10px] text-blue-400 font-bold uppercase tracking-wider">Atenção - Conexão Lógica (Diagnóstico)</p>
+                                    <p id="recom-produto" class="text-xs text-slate-300">Aguardando diagnóstico do Nível 3 (CSS)...</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900 border border-slate-700 p-4 rounded-xl mb-6 flex gap-4 items-end">
+                                <div class="flex-1">
+                                    <label class="text-[10px] text-slate-500 uppercase font-bold block mb-1">Valor da Solução (Ex: Sua Hora)</label>
+                                    <input type="number" id="calc-hora" placeholder="R$ 1000" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white focus:border-amber-500 outline-none">
+                                </div>
+                                <div class="flex-1">
+                                    <label class="text-[10px] text-slate-500 uppercase font-bold block mb-1">Multiplicador (Ex: Horas)</label>
+                                    <input type="number" id="calc-mult" placeholder="12" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white focus:border-amber-500 outline-none">
+                                </div>
+                                <button onclick="calcularAncoragem()" class="bg-amber-500 text-slate-900 px-4 py-2 rounded-lg font-bold text-sm hover:bg-amber-400">Calcular</button>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+                                    <span class="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-2 block">Passo 1</span>
+                                    <h4 class="text-white text-base font-bold mb-2">Ancoragem da Solução</h4>
+                                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Faça uma ancoragem de valor baseada no custo da solução.</p>
+                                    <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-700/50 text-xs text-slate-300 italic">
+                                        <strong class="text-amber-500 not-italic">EX:</strong> "Se a sua hora hoje custa <span id="ancora-1-hora">1 mil</span> reais, então 12 horas suas valem <span id="ancora-1-total">12 mil</span>, crie um acompanhamento de x meses por apenas <span id="ancora-1-venda">4 mil</span>."
+                                    </div>
+                                </div>
+                                <div class="bg-gradient-to-br from-amber-900/20 to-slate-800 border border-slate-700 rounded-xl p-6">
+                                    <span class="text-amber-500 text-[10px] font-bold uppercase tracking-wider mb-2 block">Passo 2</span>
+                                    <h4 class="text-white text-base font-bold mb-2">Ancoragem da Transformação</h4>
+                                    <p class="text-xs text-slate-400 leading-relaxed mb-4">Faça uma ancoragem de valor baseada no custo da transformação.</p>
+                                    <div class="bg-amber-950/30 p-3 rounded-lg border border-amber-900/30 text-xs text-slate-300 italic">
+                                        <strong class="text-amber-500 not-italic">EX:</strong> "Se a transformação dele é um veículo de 100 mil, Faça ele admitir que não tem condição para adquirir hoje, mas que com sua solução ele terá essa condição em X dias."
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Passo 6: Fechamento -->
+                        <div id="step-6" class="step-content hidden-view animate-fade-in">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-white mb-1">6. Fechamento e Objeções</h2>
+                                    <p class="text-slate-400 text-sm">O silêncio é a arma. Controle o nervosismo.</p>
+                                </div>
+                                <button class="bg-white text-slate-900 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 shadow-lg hover:bg-slate-200">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i> Integrar Agenda
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="bg-slate-800 border-l-4 border-amber-500 rounded-r-xl p-6 shadow-lg h-fit">
+                                    <h3 class="text-amber-500 text-xs font-bold uppercase tracking-wider mb-2">Comando Final</h3>
+                                    <p class="text-white text-lg font-medium leading-tight">
+                                        Faça a oferta de forma direta e <br/>
+                                        <strong class="text-amber-400 text-2xl font-black uppercase tracking-wide mt-2 block">Fique em Silêncio.</strong>
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+                                    <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-4">Banco Completo de Objeções (PRO)</h3>
+                                    <div class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                        <div class="border border-slate-800 bg-slate-800/50 rounded-lg p-3">
+                                            <h5 class="font-bold text-slate-200 text-xs mb-1">1. Financeira (Está caro / Sem $)</h5>
+                                            <p class="text-[11px] text-slate-400">Isole a objeção: "Tirando a questão do valor, tem algo mais que te impede de avançar hoje?"</p>
+                                        </div>
+                                        <div class="border border-slate-800 bg-slate-800/50 rounded-lg p-3">
+                                            <h5 class="font-bold text-slate-200 text-xs mb-1">2. Insegurança (Vou pensar)</h5>
+                                            <p class="text-[11px] text-slate-400">Drible: "Geralmente quem diz isso ficou com alguma dúvida. O que faltou esclarecer pra você?"</p>
+                                        </div>
+                                        <div class="border border-slate-800 bg-slate-800/50 rounded-lg p-3">
+                                            <h5 class="font-bold text-slate-200 text-xs mb-1">3. Terceiros (Falar com sócio/esposa)</h5>
+                                            <p class="text-[11px] text-slate-400">Contorno: "Entendo. Mas se dependesse 100% de você agora, qual seria a sua decisão?"</p>
+                                        </div>
+                                        <div class="border border-slate-800 bg-slate-800/50 rounded-lg p-3">
+                                            <h5 class="font-bold text-slate-200 text-xs mb-1">4. Garantia (E se não funcionar?)</h5>
+                                            <p class="text-[11px] text-slate-400">Reforço lógico: "Por isso temos a garantia condicional baseada na aplicação do plano estrutural."</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Navigation -->
+                    <div class="border-t border-slate-800 p-4 bg-slate-900/90 backdrop-blur-md flex justify-between items-center shrink-0">
+                        <button onclick="prevStep()" id="btn-prev" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-white transition-colors cursor-not-allowed" disabled>
+                            Voltar Etapa
+                        </button>
+                        <button onclick="nextStep()" id="btn-next" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-lg text-sm font-bold transition-colors flex items-center gap-2 shadow-lg">
+                            Próximo Passo <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <div id="finish-actions" class="hidden flex gap-2">
+                            <button onclick="stopTimer('Perdido')" class="bg-slate-800 hover:bg-red-900/50 text-red-500 border border-slate-700 hover:border-red-500/50 px-4 py-2 rounded-lg text-xs font-bold transition-colors">
+                                <i data-lucide="x" class="w-3.5 h-3.5 inline"></i> Venda Perdida
+                            </button>
+                            <button onclick="stopTimer('Reagendado')" class="bg-slate-800 hover:bg-blue-900/50 text-blue-400 border border-slate-700 hover:border-blue-500/50 px-4 py-2 rounded-lg text-xs font-bold transition-colors">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 inline"></i> Reagendar
+                            </button>
+                            <button onclick="stopTimer('Ganho')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/20">
+                                <i data-lucide="trophy" class="w-4 h-4 inline mr-1"></i> Venda Ganha!
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- SCRIPT DE INTERAÇÃO DA INTERFACE -->
     <script>
         // --- Data & State ---
         const steps = [
@@ -696,9 +683,8 @@
         let qualFinance = null;
         let activeDiagLevel = 1;
         let checkState = { sim1: false, sim2: false, sim3: false };
-        let isCallLocked = true; // Gatekeeper: Bloqueia passos 3 a 6 até aprovação
+        let isCallLocked = true;
         
-        // Timer Logic
         let timerInterval;
         let seconds = 0;
         let isTimerRunning = false;
@@ -725,8 +711,7 @@
             }, 3000);
         }
 
-        // --- Initialization ---
-        function init() {
+        function initUI() {
             renderSidebar();
             renderChecks();
             lucide.createIcons();
@@ -736,22 +721,19 @@
         // --- Call Flow & Timer ---
         function iniciarNovaCall() {
             goToView('flow');
-            
-            // Trava de segurança inicial
             isCallLocked = true;
             resetQualificacao();
             
-            // Revela o painel estático superior
             document.getElementById('static-insight-panel').classList.remove('hidden');
             document.getElementById('static-insight-panel').classList.add('grid');
+            document.getElementById('btn-relatorio-call').classList.remove('hidden');
+            document.getElementById('btn-relatorio-call').classList.add('flex');
             
-            // Oculta o botão de iniciar na sidebar
+            document.getElementById('hdr-investimento').innerText = document.getElementById('icp-capital').value || '-';
             document.getElementById('btn-start-call-sidebar').classList.add('hidden');
             
-            // Volta para a etapa 1 sempre que iniciar uma nova call
             goToStep(1);
             
-            // Inicia o timer
             if (!isTimerRunning) {
                 seconds = 0;
                 timerInterval = setInterval(() => {
@@ -775,7 +757,6 @@
             
             const btnTimer = document.getElementById('btn-timer');
             
-            // Estilização baseada no status
             if(statusDaCall === 'Ganho') {
                 btnTimer.innerHTML = `<i data-lucide="trophy" class="w-3.5 h-3.5"></i> Venda Ganha`;
                 btnTimer.className = "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2";
@@ -787,19 +768,16 @@
                 btnTimer.className = "bg-blue-500/20 text-blue-500 border border-blue-500/30 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2";
             }
             
-            // Pega o tempo formatado
             const m = Math.floor(seconds/60).toString().padStart(2, '0');
             const s = (seconds%60).toString().padStart(2, '0');
             const tempoFinal = `${m}:${s}`;
             
-            // Oculta o painel de insights
             document.getElementById('static-insight-panel').classList.add('hidden');
             document.getElementById('static-insight-panel').classList.remove('grid');
-            
-            // Mostra o botão de iniciar novamente na sidebar para a próxima call
+            document.getElementById('btn-relatorio-call').classList.add('hidden');
+            document.getElementById('btn-relatorio-call').classList.remove('flex');
             document.getElementById('btn-start-call-sidebar').classList.remove('hidden');
             
-            // Integração Firebase com o novo Status
             if (window.salvarCallNoFirebase) {
                 window.salvarCallNoFirebase(tempoFinal, statusDaCall);
             }
@@ -813,7 +791,6 @@
         function goToView(view) {
             currentView = view;
             
-            // Buttons UI
             const activeClass = 'text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-amber-500/20 text-amber-500 border border-amber-500/30';
             const inactiveClass = 'text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-slate-800 text-slate-300 hover:text-white';
 
@@ -821,7 +798,6 @@
             document.getElementById('btn-nav-sdr').className = view === 'sdr' ? activeClass : inactiveClass;
             document.getElementById('btn-nav-flow').className = view === 'flow' ? activeClass : inactiveClass;
 
-            // Views visibility
             document.getElementById('view-dashboard').classList.toggle('hidden-view', view !== 'dashboard');
             document.getElementById('view-sdr').classList.toggle('hidden-view', view !== 'sdr');
             document.getElementById('view-flow').classList.toggle('hidden-view', view !== 'flow');
@@ -829,32 +805,21 @@
             if(view === 'flow') updateStepView();
         }
 
-        // --- SDR Copy Script Logic ---
         function copyText(element) {
-            // Find the specific text target inside the clicked card
             const target = element.querySelector('.copy-target') || element;
             const textToCopy = target.innerText;
 
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const toast = document.getElementById('toast');
                 toast.classList.remove('translate-y-20', 'opacity-0');
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 2000);
+                setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 2000);
             }).catch(err => {
-                // Fallback copy logic
                 const textArea = document.createElement("textarea");
                 textArea.value = textToCopy;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand("copy");
                 document.body.removeChild(textArea);
-                
-                const toast = document.getElementById('toast');
-                toast.classList.remove('translate-y-20', 'opacity-0');
-                setTimeout(() => {
-                    toast.classList.add('translate-y-20', 'opacity-0');
-                }, 2000);
             });
         }
 
@@ -864,7 +829,7 @@
             nav.innerHTML = steps.map(step => {
                 const isActive = activeStep === step.id;
                 const isPast = activeStep > step.id;
-                const isLocked = step.id > 2 && isCallLocked; // Aplica o Gatekeeper
+                const isLocked = step.id > 2 && isCallLocked;
                 
                 let baseClasses = "flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all border shrink-0 md:shrink ";
                 
@@ -904,7 +869,6 @@
             btnPrev.classList.toggle('cursor-not-allowed', activeStep === 1);
             btnPrev.classList.toggle('opacity-50', activeStep === 1);
 
-            // Esconde botão Próximo na Etapa 2 se ainda não liberou o Gatekeeper
             if (activeStep === 2 && isCallLocked) {
                 btnNext.classList.add('hidden');
             } else if (activeStep === steps.length) {
@@ -955,20 +919,15 @@
             resQual.classList.add('hidden');
 
             if (qualFinance === 'no') {
-                // Sem dinheiro: Desqualifica independente de ser decisor
                 isCallLocked = true;
                 resDisqual.classList.remove('hidden');
             } else if (qualDecision === 'no' && qualFinance === 'yes') {
-                // Não é decisor, mas tem grana: Reagendar com decisor
                 isCallLocked = true;
                 resReagendar.classList.remove('hidden');
             } else if (qualDecision === 'yes' && qualFinance === 'yes') {
-                // Decisor e com grana: Libera o script!
                 isCallLocked = false;
                 resQual.classList.remove('hidden');
             }
-            
-            // Força a atualização da sidebar para mostrar ou esconder os cadeados
             updateStepView();
         }
 
@@ -984,7 +943,6 @@
             document.getElementById('result-qualified').classList.add('hidden');
             
             const defaultBtn = "flex-1 py-3 rounded-lg text-xs font-bold border bg-slate-700 border-slate-600 text-white hover:bg-slate-600 transition-all";
-            
             document.getElementById('btn-dec-yes').className = defaultBtn;
             document.getElementById('btn-dec-no').className = defaultBtn;
             document.getElementById('btn-fin-yes').className = defaultBtn;
@@ -995,10 +953,6 @@
 
         // --- Relatório ICP Logic ---
         function gerarRelatorioICP() {
-            const modal = document.getElementById('modal-relatorio');
-            const txt = document.getElementById('relatorio-texto');
-            
-            // Coleta de dados atuais em tela
             const nome = document.getElementById('icp-nome').value || 'Não informado';
             const idade = document.getElementById('icp-idade').value || 'Não informado';
             const meta = document.getElementById('icp-meta').value || 'Não informado';
@@ -1011,54 +965,18 @@
             const sonho = document.getElementById('hdr-sonho').innerText !== '-' ? document.getElementById('hdr-sonho').innerText : 'Não consolidado';
             const transformacao = document.getElementById('hdr-transformacao').innerText !== '-' ? document.getElementById('hdr-transformacao').innerText : 'Não consolidada';
             
-            const anotacoes = document.getElementById('client-notes').value || 'Sem anotações.';
-
-            const dossie = `===========================================
-DOSSIÊ ICP XTREMA - ANÁLISE DE LEAD
-===========================================
-DATA: ${new Date().toLocaleString('pt-BR')}
-
-[ 1. DADOS DE PRÉ-FRAMING (SDR) ]
-• Nome/Perfil: ${nome}
-• Idade: ${idade}
-• Meta de Ganhos: ${meta}
-• Capital Declarado: ${capital}
-• Status de Qualificação: ${isCallLocked ? 'BLOQUEADO/DESQUALIFICADO' : 'APROVADO (Decisor com Capital)'}
-
-[ 2. MAPEAMENTO DE CONSCIÊNCIA (DIAGNÓSTICO) ]
-• Ambição Declarada: "${ambicao}"
-• Dor Principal (Problema): "${dor}"
-• Solução que ele imagina: "${solucao}"
-
-[ 3. CONSOLIDAÇÃO EMOCIONAL (CÉU E INFERNO) ]
-• O Sonho (Motivação Raiz): "${sonho}"
-• A Transformação (Custo da Inércia): "${transformacao}"
-
-[ 4. ANOTAÇÕES EXTRAS DO CLOSER ]
-${anotacoes}
-===========================================
-`;
-            txt.value = dossie;
+            const cabecalho = "NOME\tIDADE\tMETA\tCAPITAL\tAMBIÇÃO\tDOR\tSOLUÇÃO\tSONHO\tTRANSFORMAÇÃO";
+            const linha = `${nome}\t${idade}\t${meta}\t${capital}\t${ambicao}\t${dor}\t${solucao}\t${sonho}\t${transformacao}`;
+            const dadosPlanilha = `${cabecalho}\n${linha}`;
             
-            // Exibir Modal
-            modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.remove('opacity-0'), 10);
-        }
-        
-        function fecharRelatorio() {
-            const modal = document.getElementById('modal-relatorio');
-            modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-        
-        function copiarRelatorio() {
-            const txt = document.getElementById('relatorio-texto');
-            txt.select();
-            document.execCommand('copy');
-            showSystemToast("Dossiê copiado para a área de transferência!");
+            navigator.clipboard.writeText(dadosPlanilha).then(() => {
+                showSystemToast("Dossiê ICP copiado! Cole na sua planilha.");
+            }).catch(err => {
+                showSystemToast("Erro ao copiar dossiê.", "error");
+            });
         }
 
-        // --- Diagnóstico Logic (Algoritmo de Mapeamento) ---
+        // --- Diagnóstico Logic ---
         function processarDiagnostico() {
             const val1 = document.getElementById('diag-q1').value.trim();
             const val2 = document.getElementById('diag-q2').value.trim();
@@ -1066,7 +984,6 @@ ${anotacoes}
             const val4 = document.getElementById('diag-q4').value.trim();
             const val5 = document.getElementById('diag-q5').value.trim();
 
-            // Lógica de desbloqueio em cascata (Se respondeu o anterior, desbloqueia o próximo)
             document.getElementById('box-csp').classList.toggle('disabled-box', !val1);
             document.getElementById('diag-q2').disabled = !val1;
 
@@ -1079,7 +996,6 @@ ${anotacoes}
             document.getElementById('box-cs').classList.toggle('disabled-box', !val4);
             document.getElementById('diag-q5').disabled = !val4;
 
-            // Determinação do Nível
             let level = 1; 
             let levelName = '1. Inconsciente';
             
@@ -1089,13 +1005,11 @@ ${anotacoes}
             if (val4) { level = 4; levelName = '4. Consciente do Produto'; }
             if (val5) { level = 5; levelName = '5. Pronto para Comprar'; }
 
-            // Atualiza Header e Texto Tático
             document.getElementById('hdr-nivel').innerText = levelName;
             document.getElementById('diag-action-text').innerText = diagnosisLevels.find(l => l.id === level).action;
             activeDiagLevel = level;
         }
 
-        // --- Confirmação Logic ---
         function renderChecks() {
             document.getElementById('checks-container').innerHTML = confirmQuestions.map(item => {
                 const isChecked = checkState[item.id];
@@ -1117,56 +1031,6 @@ ${anotacoes}
         }
         function toggleCheck(id) { checkState[id] = !checkState[id]; renderChecks(); }
 
-        // --- Premium Integrations (Simulated) ---
-        
-        // Timer
-        function toggleTimer() {
-            const btn = document.getElementById('btn-timer');
-            if(isTimerRunning) {
-                clearInterval(timerInterval);
-                btn.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5"></i> Retomar`;
-                btn.className = "bg-amber-500/20 text-amber-500 border border-amber-500/30 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2";
-            } else {
-                timerInterval = setInterval(() => {
-                    seconds++;
-                    const m = Math.floor(seconds/60).toString().padStart(2, '0');
-                    const s = (seconds%60).toString().padStart(2, '0');
-                    document.getElementById('call-timer').innerText = `${m}:${s}`;
-                }, 1000);
-                btn.innerHTML = `<i data-lucide="square" class="w-3.5 h-3.5"></i> Pausar`;
-                btn.className = "bg-red-500/20 text-red-500 border border-red-500/30 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2";
-            }
-            isTimerRunning = !isTimerRunning;
-            lucide.createIcons();
-        }
-
-        // IA CRM Simulator
-        function processIA() {
-            const btn = document.getElementById('btn-ia');
-            const res = document.getElementById('ia-results');
-            const notes = document.getElementById('client-notes').value;
-            
-            if(!notes.trim()) {
-                showSystemToast('Escreva algo nas anotações antes de processar.', 'error');
-                return;
-            }
-
-            // Loading state
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 text-amber-500 animate-spin"></i> Processando IA...`;
-            btn.classList.add('ia-processing');
-            res.classList.add('hidden');
-            lucide.createIcons();
-
-            // Simulate API Call
-            setTimeout(() => {
-                btn.classList.remove('ia-processing');
-                btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i> Atualizar Gatilhos`;
-                res.classList.remove('hidden');
-                lucide.createIcons();
-            }, 1500);
-        }
-
-        // Action Plan Generator (Step 3)
         function gerarPlanoAcao() {
             const input = document.getElementById('action-input').value;
             const res = document.getElementById('action-result');
@@ -1178,29 +1042,24 @@ ${anotacoes}
             }, 1000);
         }
 
-        // Calculator (Step 5)
         function calcularAncoragem() {
             const hora = document.getElementById('calc-hora').value || 1000;
             const mult = document.getElementById('calc-mult').value || 12;
             const total = hora * mult;
-            const venda = total / 3; // Lógica exemplo de desconto na ancoragem
+            const venda = total / 3; 
 
             document.getElementById('ancora-1-hora').innerText = `R$ ${hora}`;
             document.getElementById('ancora-1-total').innerText = `R$ ${total.toLocaleString()}`;
             document.getElementById('ancora-1-venda').innerText = `R$ ${venda.toLocaleString()}`;
         }
-
-        // Start
-        window.onload = init;
     </script>
     
-    <!-- INTEGRAÇÃO FIREBASE (BANCO DE DADOS) -->
+    <!-- INTEGRAÇÃO FIREBASE (AUTENTICAÇÃO E BANCO DE DADOS) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuração Padrão do Ambiente Canvas (Se você usar seu próprio Firebase, substitua esta variável pelas suas credenciais)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'xtrema-pro-local';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             // COLAR SUAS CREDENCIAIS DO FIREBASE AQUI QUANDO FOR HOSPEDAR SOZINHO
@@ -1214,44 +1073,95 @@ ${anotacoes}
 
         let app, db, auth, currentUser;
 
-        async function initFirebaseApp() {
-            if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey === "COLE_AQUI") {
-                console.warn("Firebase não configurado com credenciais reais. O salvamento funcionará apenas na memória temporária desta sessão Canvas.");
-                if (typeof __firebase_config === 'undefined') return; // Aborta se não estiver no Canvas e não tiver config
-            }
+        // Elementos de UI de Login
+        const loginScreen = document.getElementById('login-screen');
+        const appContainer = document.getElementById('app-container');
+        const formLogin = document.getElementById('form-login');
+        const loginError = document.getElementById('login-error');
+        const btnLogout = document.getElementById('btn-logout');
 
+        async function initFirebaseApp() {
             try {
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Autenticação (Requerida pelo banco de dados)
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                
-                currentUser = auth.currentUser;
-                console.log("Firebase conectado! ID do Vendedor:", currentUser.uid);
-                
-                document.getElementById('crm-status').innerHTML = `<i data-lucide="cloud-lightning" class="w-3 h-3"></i> CRM Online`;
-                document.getElementById('crm-status').className = "bg-emerald-500/20 text-emerald-500 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1";
-                lucide.createIcons();
+                // Listener de Autenticação (Monitora se está logado ou não)
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        iniciarSessao(user);
+                    } else {
+                        // Verifica se está no Canvas e possui token de teste
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            signInWithCustomToken(auth, __initial_auth_token).catch(e => mostrarTelaLogin());
+                        } else {
+                            mostrarTelaLogin();
+                        }
+                    }
+                });
 
-                // Carrega dados iniciais
-                carregarDashboardFirebase();
+                // Lógica do Formulário de Login
+                formLogin.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const pass = document.getElementById('login-password').value;
+                    const btnEntrar = document.getElementById('btn-entrar');
+                    
+                    btnEntrar.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Autenticando...`;
+                    btnEntrar.classList.add('opacity-70', 'cursor-not-allowed');
+                    loginError.classList.add('hidden');
+                    
+                    try {
+                        await signInWithEmailAndPassword(auth, email, pass);
+                        // Sucesso: O onAuthStateChanged vai capturar e chamar iniciarSessao()
+                    } catch (error) {
+                        console.error("Erro no login:", error);
+                        loginError.classList.remove('hidden');
+                        btnEntrar.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Acessar Sistema`;
+                        btnEntrar.classList.remove('opacity-70', 'cursor-not-allowed');
+                        lucide.createIcons();
+                    }
+                });
+
+                // Lógica de Logout
+                btnLogout.addEventListener('click', () => {
+                    signOut(auth);
+                });
 
             } catch (error) {
                 console.error("Erro ao iniciar Firebase:", error);
-                document.getElementById('crm-status').innerHTML = `<i data-lucide="cloud-off" class="w-3 h-3"></i> Offline`;
-                document.getElementById('crm-status').className = "bg-red-500/20 text-red-500 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1";
             }
         }
 
-        // Função para salvar a call quando finalizar
+        function mostrarTelaLogin() {
+            currentUser = null;
+            loginScreen.classList.remove('hidden');
+            appContainer.classList.add('hidden-view');
+            
+            // Reseta botão
+            const btnEntrar = document.getElementById('btn-entrar');
+            btnEntrar.innerHTML = `<i data-lucide="log-in" class="w-4 h-4"></i> Acessar Sistema`;
+            btnEntrar.classList.remove('opacity-70', 'cursor-not-allowed');
+            lucide.createIcons();
+        }
+
+        function iniciarSessao(user) {
+            currentUser = user;
+            console.log("Usuário logado:", currentUser.uid);
+            
+            loginScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden-view');
+            
+            document.getElementById('crm-status').innerHTML = `<i data-lucide="cloud-lightning" class="w-3 h-3"></i> CRM Online`;
+            document.getElementById('crm-status').className = "bg-emerald-500/20 text-emerald-500 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1";
+            
+            initUI();
+            carregarDashboardFirebase();
+        }
+
+        // Função de Salvamento no Firebase
         window.salvarCallNoFirebase = async function(tempoCall, statusFinal) {
-            if (!currentUser) return; // Regra de segurança
+            if (!currentUser) return;
 
             try {
                 const callsRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'calls');
@@ -1259,27 +1169,27 @@ ${anotacoes}
                 let ticketFinalStr = document.getElementById('ancora-1-venda').innerText.replace(/[^\d]/g, '');
                 let ticketFinal = parseInt(ticketFinalStr) || 0;
 
+                const notaCliente = document.getElementById('client-notes') ? document.getElementById('client-notes').value : '';
+
                 const novaCall = {
                     data: new Date().toISOString(),
                     tempo: tempoCall,
                     nivelConsciencia: document.getElementById('hdr-nivel').innerText,
                     ticketProposto: ticketFinal,
-                    status: statusFinal, // Recebe 'Ganho', 'Perdido' ou 'Reagendado' dinamicamente
+                    status: statusFinal,
                     icp: {
                         preFraming: {
-                            nomeOcupacao: document.getElementById('icp-nome').value, // Alterado para .value
+                            nomeOcupacao: document.getElementById('icp-nome').value,
                             idade: document.getElementById('icp-idade').value,
                             metaGanhos: document.getElementById('icp-meta').value,
                             capital: document.getElementById('icp-capital').value
                         },
-                        // Mapeamento Resumido (Tático)
                         mapeamento: {
-                            ambicao: hdrAmbicao !== '-' ? hdrAmbicao : '',
-                            dor: hdrDor !== '-' ? hdrDor : '',
-                            sonho: hdrSonho !== '-' ? hdrSonho : '',
-                            transformacao: hdrTransformacao !== '-' ? hdrTransformacao : ''
+                            ambicao: document.getElementById('hdr-ambicao').innerText !== '-' ? document.getElementById('hdr-ambicao').innerText : '',
+                            dor: document.getElementById('hdr-dor').innerText !== '-' ? document.getElementById('hdr-dor').innerText : '',
+                            sonho: document.getElementById('hdr-sonho').innerText !== '-' ? document.getElementById('hdr-sonho').innerText : '',
+                            transformacao: document.getElementById('hdr-transformacao').innerText !== '-' ? document.getElementById('hdr-transformacao').innerText : ''
                         },
-                        // Falas exatas registradas nos blocos (Níveis de Consciência)
                         respostasBrutas: {
                             inconsciente: document.getElementById('diag-q1').value,
                             conscienteProblema: document.getElementById('diag-q2').value,
@@ -1287,15 +1197,12 @@ ${anotacoes}
                             conscienteProduto: document.getElementById('diag-q4').value,
                             prontoComprar: document.getElementById('diag-q5').value
                         },
-                        // Anotações gerais do Smart CRM IA
-                        anotacoes: document.getElementById('client-notes').value
+                        anotacoes: notaCliente
                     }
                 };
 
                 await addDoc(callsRef, novaCall);
                 console.log("Registro salvo no Firebase com sucesso!");
-                
-                // Atualiza o dashboard logo após salvar
                 carregarDashboardFirebase();
                 
             } catch (error) {
@@ -1304,7 +1211,7 @@ ${anotacoes}
             }
         };
 
-        // Função para ler os dados e preencher o dashboard
+        // Função de Leitura (Dashboard)
         async function carregarDashboardFirebase() {
             if (!currentUser) return;
 
@@ -1316,7 +1223,6 @@ ${anotacoes}
                 let ganhas = 0;
                 let perdidas = 0;
                 let reagendadas = 0;
-                let totalRevenue = 0;
                 const callsRecentes = [];
 
                 snapshot.forEach((doc) => {
@@ -1325,17 +1231,14 @@ ${anotacoes}
                     
                     if(data.status === 'Ganho' || data.status === 'Fechado (Won)') {
                         ganhas++;
-                        totalRevenue += (data.ticketProposto || 0);
                     } else if (data.status === 'Perdido') {
                         perdidas++;
                     } else if (data.status === 'Reagendado') {
                         reagendadas++;
                     }
-                    
                     callsRecentes.push(data);
                 });
 
-                // Atualizar KPIs na tela
                 document.getElementById('dash-calls').innerText = totalCalls;
                 document.getElementById('dash-ganhas').innerText = ganhas;
                 document.getElementById('dash-perdidas').innerText = perdidas;
@@ -1346,12 +1249,9 @@ ${anotacoes}
                     document.getElementById('dash-taxa').innerText = `${winRate}%`;
                 }
 
-                // Atualizar Tabela de CRM
                 const tbody = document.getElementById('crm-table-body');
                 if (callsRecentes.length > 0) {
-                    // Ordenar por data mais recente
                     callsRecentes.sort((a, b) => new Date(b.data) - new Date(a.data));
-                    
                     tbody.innerHTML = callsRecentes.map(call => {
                         const dataFormatada = new Date(call.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit' });
                         return `
@@ -1370,6 +1270,8 @@ ${anotacoes}
                             </tr>
                         `;
                     }).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-500 italic">Nenhuma call registrada ainda. Inicie uma nova call.</td></tr>`;
                 }
 
             } catch (error) {
@@ -1377,7 +1279,6 @@ ${anotacoes}
             }
         }
 
-        // Inicia a conexão
         initFirebaseApp();
     </script>
 </body>
