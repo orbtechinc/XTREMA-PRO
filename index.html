@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XTREMA PRO • Plataforma de Vendas</title>
+    <title>XTREMA PRO • Plataforma Comercial & Treinamento</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: #e2e8f0; }
         ::selection { background-color: rgba(245, 158, 11, 0.3); }
@@ -18,7 +18,7 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
         
         @keyframes pulse-border { 0% { border-color: rgba(245,158,11,0.2); } 50% { border-color: rgba(245,158,11,0.8); } 100% { border-color: rgba(245,158,11,0.2); } }
         .ia-processing { animation: pulse-border 1.5s infinite; }
@@ -26,7 +26,7 @@
         .hidden-view { display: none !important; }
         .disabled-box { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
 
-        /* Estilo da Gaveta/Modo Tela Cheia do Script de Qualificação */
+        /* Estilo da Gaveta/Modo Tela Cheia dos Scripts de WhatsApp */
         .script-fullscreen-active {
             position: fixed !important;
             inset: 0 !important;
@@ -58,7 +58,7 @@
 </head>
 <body class="min-h-screen flex flex-col h-screen overflow-hidden relative">
 
-    <!-- Modal Customizado de Confirmação -->
+    <!-- Modal Customizado de Confirmação de Exclusão -->
     <div id="custom-confirm-modal" class="fixed inset-0 z-[100] bg-slate-950/80 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-6 max-w-sm w-full animate-fade-in relative overflow-hidden">
             <div class="absolute top-0 left-0 right-0 h-1 bg-red-500"></div>
@@ -157,13 +157,13 @@
 
     <!-- MAIN APP CONTAINER -->
     <div id="app-container" class="hidden-view flex flex-col h-full w-full">
-        <!-- Notificações do Sistema -->
+        <!-- Notificações Toast do Sistema -->
         <div id="system-toast" class="fixed top-20 right-4 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-2xl transform translate-x-full opacity-0 transition-all duration-300 z-50 flex items-center gap-3 border border-slate-700">
             <div id="system-toast-icon" class="text-emerald-500"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
             <span id="system-toast-msg" class="text-sm font-medium">Sucesso!</span>
         </div>
 
-        <!-- Header -->
+        <!-- Header Superior Fixo -->
         <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-30 flex-shrink-0 shadow-lg">
             <div class="max-w-[1400px] mx-auto flex justify-between items-center gap-4">
                 <div class="flex items-center gap-6">
@@ -173,7 +173,7 @@
                             <span class="bg-amber-500 text-slate-900 text-[10px] px-2 py-0.5 rounded font-black tracking-wider uppercase">PRO</span>
                         </h1>
                     </div>
-                    <!-- Nav top -->
+                    <!-- Menu de Navegação Superior -->
                     <div class="hidden md:flex gap-2">
                         <button onclick="goToView('dashboard')" id="btn-nav-dash" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-slate-800 text-slate-300 hover:text-white">Dashboard</button>
                         <button onclick="goToView('qualificacao')" id="btn-nav-qual" class="text-xs font-semibold px-3 py-1.5 rounded-md transition-colors bg-slate-800 text-slate-300 hover:text-white">Qualificação</button>
@@ -201,9 +201,9 @@
                 </div>
             </div>
             
-            <!-- Painel Tático Estático (Visível apenas na Call) -->
+            <!-- Painel Tático Estático (Visível exclusivamente durante a Call) -->
             <div id="static-insight-panel" class="max-w-[1400px] mx-auto mt-4 hidden flex-col gap-2 transition-all duration-300">
-                <!-- Linha 1: Qualificação -->
+                <!-- Linha 1: Qualificação Essencial -->
                 <div class="grid grid-cols-3 gap-2">
                     <div class="bg-blue-950/20 p-2.5 rounded-lg border border-blue-900/50 shadow-inner flex flex-col justify-center">
                         <span class="text-[9px] text-blue-400 font-bold uppercase tracking-wider mb-0.5">Nome / Cidade</span>
@@ -219,7 +219,7 @@
                     </div>
                 </div>
 
-                <!-- Linha 2: Diagnóstico -->
+                <!-- Linha 2: Diagnóstico em Tempo Real -->
                 <div class="grid grid-cols-5 gap-2">
                     <div class="bg-slate-950 p-2.5 rounded-lg border border-amber-500/30 shadow-inner flex flex-col justify-center">
                         <span class="text-[9px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">Nível de Consciência</span>
@@ -651,8 +651,8 @@
                     </div>
                 </div>
 
+                <!-- Matriz de Decisão de Qualificação -->
                 <div class="space-y-6 max-w-4xl mx-auto mb-8">
-                    <!-- Matriz de Resultados (Automática) -->
                     <div id="result-reagendar-decisor" class="hidden bg-blue-950/40 border border-blue-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
                         <div class="flex items-center gap-2 text-blue-400 font-bold text-sm">
                             <i data-lucide="users" class="w-5 h-5"></i> Não é o Decisor Final
@@ -730,7 +730,7 @@
                     </div>
                 </div>
 
-                <!-- Histórico CRM Movido para a Agenda -->
+                <!-- Histórico CRM Integrado -->
                 <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 relative shadow-lg">
                     <div class="flex items-center gap-2 mb-4">
                         <h3 class="text-sm font-bold text-white">Histórico Recente de Calls (CRM)</h3>
@@ -770,7 +770,7 @@
 
                     <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-2">Roadmap da Reunião</h2>
                     <nav id="sidebar-nav" class="flex md:flex-col gap-2 overflow-x-auto hide-scrollbar pb-2 md:pb-0">
-                        <!-- Nav items generated via JS -->
+                        <!-- Itens de navegação via JS -->
                     </nav>
                 </div>
 
@@ -1121,10 +1121,8 @@
         let leadAtivoOriginalDocId = null;
         let totalAgendamentosCriados = 0;
         
-        // Estado de autenticação (login vs cadastro)
-        let authMode = 'login'; // 'login' ou 'register'
+        let authMode = 'login'; 
 
-        // Carrega do storage local para preservar contagem histórica de agendamentos
         try {
             totalAgendamentosCriados = parseInt(localStorage.getItem('xtrema_total_agendamentos') || '0', 10);
             const savedLeads = localStorage.getItem('xtrema_leads_confirmados');
@@ -1138,7 +1136,6 @@
         let statusPendenteCheckout = '';
         let isScriptFullscreen = false;
 
-        // Alternador de abas entre Login e Cadastro
         function alternarModoAuth(modo) {
             authMode = modo;
             const tabLogin = document.getElementById('tab-login');
@@ -1184,35 +1181,27 @@
             const matrizResultados = document.querySelectorAll('#view-qualificacao .space-y-6.max-w-4xl');
 
             if (isScriptFullscreen) {
-                // Ativa modo tela cheia no container de qualificação
                 viewQual.classList.add('script-fullscreen-active');
-                
-                // Oculta completamente o Bloco de Contexto de Qualificação e o Cabeçalho da página
                 blocoLead.classList.add('hidden');
                 qualHeader.classList.add('hidden');
                 matrizResultados.forEach(m => m.classList.add('hidden'));
 
-                // Oculta botão antigo do header do box e exibe o botão destacado de sair
                 if (btnFecharFullscreen) {
                     btnFecharFullscreen.classList.remove('hidden');
                     btnFecharFullscreen.classList.add('flex');
                 }
 
-                // Expande o container dos scripts para ocupar 100% da viewport disponível
                 scriptBox.classList.add('script-box-fullscreen');
                 scriptBox.classList.remove('mb-8');
                 scriptContainer.classList.remove('max-h-[650px]');
                 scriptContainer.classList.add('h-full', 'max-h-none');
 
-                // Atualiza textos e ícones
                 if (textToggle) textToggle.innerText = 'Sair da Tela Cheia';
                 if (iconToggle) iconToggle.setAttribute('data-lucide', 'minimize');
                 if (textHeader) textHeader.innerText = 'Sair da Tela Cheia';
                 if (iconHeader) iconHeader.setAttribute('data-lucide', 'minimize');
             } else {
-                // Desativa modo tela cheia e restaura o formulário de contexto de qualificação
                 viewQual.classList.remove('script-fullscreen-active');
-                
                 blocoLead.classList.remove('hidden');
                 qualHeader.classList.remove('hidden');
                 matrizResultados.forEach(m => m.classList.remove('hidden'));
@@ -1236,7 +1225,6 @@
             lucide.createIcons();
         }
 
-        // Tecla ESC para sair do modo tela cheia
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && isScriptFullscreen) {
                 toggleScriptFullscreen();
@@ -1252,7 +1240,6 @@
             const dataInput = document.getElementById('checkout-reagendamento-data');
             const labelValor = document.getElementById('checkout-valor-label');
             
-            // Puxa sugestão da ancoragem de venda calculada se for Ganho, Perdido ou Reagendado
             let valorSugeridoStr = '';
             const elVenda = document.getElementById('ancora-1-venda');
             if (elVenda) {
@@ -1282,7 +1269,6 @@
                 borda.className = 'absolute top-0 left-0 right-0 h-1 bg-blue-500';
                 labelValor.innerText = 'Valor da Oportunidade (R$)';
                 dataContainer.classList.remove('hidden');
-                // Sugere data default para o dia seguinte no mesmo horário
                 const amanha = new Date(Date.now() + 24 * 60 * 60 * 1000);
                 amanha.setMinutes(amanha.getMinutes() - amanha.getTimezoneOffset());
                 dataInput.value = amanha.toISOString().slice(0, 16);
@@ -1710,7 +1696,6 @@
 
             goToStep(1);
 
-            // Inicia o cronômetro da call
             clearInterval(timerInterval);
             seconds = 0;
             isTimerRunning = true;
@@ -2064,13 +2049,14 @@
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'xtrema-pro-local';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "COLE_AQUI",
-            authDomain: "COLE_AQUI",
-            projectId: "COLE_AQUI",
-            storageBucket: "COLE_AQUI",
-            messagingSenderId: "COLE_AQUI",
-            appId: "COLE_AQUI"
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOeGiG2CEzEhK5yRrvRzl7FLX5eJ69JVs",
+            authDomain: "xtrema-pro-app.firebaseapp.com",
+            projectId: "xtrema-pro-app",
+            storageBucket: "xtrema-pro-app.firebasestorage.app",
+            messagingSenderId: "563277762959",
+            appId: "1:563277762959:web:d2943be5e226dc1bb2fbfa",
+            measurementId: "G-5NT5SE41VN"
         };
 
         let app, db, auth, currentUser;
@@ -2464,7 +2450,6 @@
             carregarDashboardFirebase();
         }
 
-        // Função de Salvamento de No-Show
         window.salvarNoShowNoFirebase = async function(lead) {
             if (!currentUser) return;
             try {
@@ -2507,7 +2492,6 @@
             }
         };
 
-        // Função de Salvamento no Firebase
         window.salvarCallNoFirebase = async function(tempoCall, statusFinal, valorFinal = 0, dataReagendamento = null, docIdExistente = null, callbackNovoId = null) {
             if (!currentUser) return;
 
@@ -2570,7 +2554,6 @@
             }
         };
 
-        // Função de Leitura e Sincronização
         window.carregarDashboardFirebase = async function() {
             if (!currentUser) return;
 
