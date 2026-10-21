@@ -203,19 +203,31 @@
             
             <!-- Painel Tático Estático (Visível exclusivamente durante a Call) -->
             <div id="static-insight-panel" class="max-w-[1400px] mx-auto mt-4 hidden flex-col gap-2 transition-all duration-300">
-                <!-- Linha 1: Qualificação Essencial -->
-                <div class="grid grid-cols-3 gap-2">
+                <!-- Linha 1: Qualificação Essencial do Lead -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                     <div class="bg-blue-950/20 p-2.5 rounded-lg border border-blue-900/50 shadow-inner flex flex-col justify-center">
                         <span class="text-[9px] text-blue-400 font-bold uppercase tracking-wider mb-0.5">Nome / Cidade</span>
                         <span id="hdr-nome" class="text-white text-[11px] font-medium truncate">-</span>
                     </div>
-                    <div class="bg-blue-950/20 p-2.5 rounded-lg border border-blue-900/50 shadow-inner flex flex-col justify-center">
-                        <span class="text-[9px] text-blue-400 font-bold uppercase tracking-wider mb-0.5">Decisor / Empregado</span>
-                        <span id="hdr-decisor-status" class="text-white text-[11px] font-medium truncate">-</span>
+                    <div class="bg-purple-950/20 p-2.5 rounded-lg border border-purple-900/50 shadow-inner flex flex-col justify-center">
+                        <span class="text-[9px] text-purple-400 font-bold uppercase tracking-wider mb-0.5">Meta Mensal</span>
+                        <span id="hdr-meta-mensal" class="text-purple-300 text-[11px] font-bold truncate">-</span>
                     </div>
-                    <div class="bg-blue-950/20 p-2.5 rounded-lg border border-blue-900/50 shadow-inner flex flex-col justify-center">
-                        <span class="text-[9px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">Capital / Valor Disponível</span>
+                    <div class="bg-indigo-950/20 p-2.5 rounded-lg border border-indigo-900/50 shadow-inner flex flex-col justify-center">
+                        <span class="text-[9px] text-indigo-400 font-bold uppercase tracking-wider mb-0.5">Prazo Desejado</span>
+                        <span id="hdr-prazo" class="text-indigo-300 text-[11px] font-medium truncate">-</span>
+                    </div>
+                    <div class="bg-amber-950/20 p-2.5 rounded-lg border border-amber-900/50 shadow-inner flex flex-col justify-center">
+                        <span class="text-[9px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">Capital p/ Investir</span>
                         <span id="hdr-capital" class="text-amber-300 text-[11px] font-bold truncate">-</span>
+                    </div>
+                    <div class="bg-emerald-950/20 p-2.5 rounded-lg border border-emerald-900/50 shadow-inner flex flex-col justify-center">
+                        <span class="text-[9px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Valor Disponível</span>
+                        <span id="hdr-valor-disponivel" class="text-emerald-300 text-[11px] font-bold truncate">-</span>
+                    </div>
+                    <div class="bg-teal-950/20 p-2.5 rounded-lg border border-teal-900/50 shadow-inner flex flex-col justify-center">
+                        <span class="text-[9px] text-teal-400 font-bold uppercase tracking-wider mb-0.5">Comprometimento</span>
+                        <span id="hdr-comprometimento" class="text-teal-300 text-[11px] font-medium truncate">-</span>
                     </div>
                 </div>
 
@@ -605,7 +617,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-7 gap-3 text-xs">
                         <div class="flex flex-col">
                             <span class="text-slate-400 text-[10px] font-bold uppercase mb-1">4. Ocupação (Empregado?)</span>
-                            <select id="icp-ocupacao-status" onchange="atualizarCabecalhoDecisor(); verificarQualificacao();" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full cursor-pointer">
+                            <select id="icp-ocupacao-status" onchange="verificarQualificacao();" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full cursor-pointer">
                                 <option value="" disabled selected>Selecione</option>
                                 <option value="sim">Sim (Trabalha / Empregado)</option>
                                 <option value="nao">Não (Desempregado / Sem Renda)</option>
@@ -613,7 +625,7 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="text-slate-400 text-[10px] font-bold uppercase mb-1">5. É o Decisor Final?</span>
-                            <select id="icp-decisor-status" onchange="atualizarCabecalhoDecisor(); verificarQualificacao();" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full cursor-pointer">
+                            <select id="icp-decisor-status" onchange="verificarQualificacao();" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full cursor-pointer">
                                 <option value="" disabled selected>Selecione</option>
                                 <option value="sim">Sim (Maior de idade / Decide sozinho)</option>
                                 <option value="nao">Não (Menor / Precisa dos pais)</option>
@@ -621,11 +633,11 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="text-slate-400 text-[10px] font-bold uppercase mb-1">6. Meta Mensal</span>
-                            <input type="text" id="icp-meta-mensal" placeholder="Ex: R$ 5.000/mês" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full">
+                            <input type="text" id="icp-meta-mensal" placeholder="Ex: R$ 5.000/mês" oninput="atualizarCabecalhoMeta();" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full">
                         </div>
                         <div class="flex flex-col">
                             <span class="text-slate-400 text-[10px] font-bold uppercase mb-1">7. Prazo Desejado</span>
-                            <input type="text" id="icp-prazo" placeholder="Ex: 20 dias / 2 meses" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full">
+                            <input type="text" id="icp-prazo" placeholder="Ex: 20 dias / 2 meses" oninput="atualizarCabecalhoPrazo();" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full">
                         </div>
                         <div class="flex flex-col">
                             <span class="text-slate-400 text-[10px] font-bold uppercase mb-1">8. Capital p/ Investir</span>
@@ -633,7 +645,7 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="text-amber-400 text-[10px] font-bold uppercase mb-1">9. Valor Disponível</span>
-                            <select id="icp-tem-investimento-agora" onchange="atualizarCabecalhoCapital(); verificarQualificacao();" class="bg-slate-900/70 border border-amber-500/40 rounded p-2 text-xs text-white focus:border-amber-500 outline-none w-full cursor-pointer">
+                            <select id="icp-tem-investimento-agora" onchange="atualizarCabecalhoValorDisponivel(); verificarQualificacao();" class="bg-slate-900/70 border border-amber-500/40 rounded p-2 text-xs text-white focus:border-amber-500 outline-none w-full cursor-pointer">
                                 <option value="" disabled selected>Selecione</option>
                                 <option value="pix">Sim no Pix</option>
                                 <option value="credito">Sim no Crédito</option>
@@ -642,7 +654,7 @@
                         </div>
                         <div class="flex flex-col col-span-2 md:col-span-1">
                             <span class="text-slate-400 text-[10px] font-bold uppercase mb-1">10. Comprometido?</span>
-                            <select id="icp-comprometido" onchange="verificarQualificacao()" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full cursor-pointer">
+                            <select id="icp-comprometido" onchange="atualizarCabecalhoComprometimento(); verificarQualificacao();" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full cursor-pointer">
                                 <option value="" disabled selected>Selecione</option>
                                 <option value="sim">Sim (Compromisso Total)</option>
                                 <option value="nao">Não (Curioso / Indeciso)</option>
@@ -1318,26 +1330,50 @@
             document.getElementById('hdr-nome').innerText = cidade ? `${nome} (${cidade})` : nome;
         }
 
-        function atualizarCabecalhoDecisor() {
-            const empregado = document.getElementById('icp-ocupacao-status').value === 'sim' ? 'Empregado' : 'Sem renda';
-            const decisor = document.getElementById('icp-decisor-status').value === 'sim' ? 'Decisor' : 'Não Decisor';
-            const el = document.getElementById('hdr-decisor-status');
-            if (el) {
-                el.innerText = `${decisor} / ${empregado}`;
-            }
+        function atualizarCabecalhoMeta() {
+            const meta = document.getElementById('icp-meta-mensal')?.value || '-';
+            const el = document.getElementById('hdr-meta-mensal');
+            if (el) el.innerText = meta;
+        }
+
+        function atualizarCabecalhoPrazo() {
+            const prazo = document.getElementById('icp-prazo')?.value || '-';
+            const el = document.getElementById('hdr-prazo');
+            if (el) el.innerText = prazo;
         }
 
         function atualizarCabecalhoCapital() {
             const capital = document.getElementById('icp-capital').value || '-';
-            const agora = document.getElementById('icp-tem-investimento-agora').value;
-            let statusAgora = '';
+            const el = document.getElementById('hdr-capital');
+            if (el) el.innerText = capital;
+        }
+
+        function atualizarCabecalhoValorDisponivel() {
+            const agora = document.getElementById('icp-tem-investimento-agora')?.value;
+            let statusAgora = '-';
             if (agora === 'pix') statusAgora = 'Pix';
             else if (agora === 'credito') statusAgora = 'Crédito';
             else if (agora === 'nao') statusAgora = 'Não tem agora';
-            const el = document.getElementById('hdr-capital');
-            if (el) {
-                el.innerText = statusAgora ? `${capital} (${statusAgora})` : capital;
-            }
+            const el = document.getElementById('hdr-valor-disponivel');
+            if (el) el.innerText = statusAgora;
+        }
+
+        function atualizarCabecalhoComprometimento() {
+            const comp = document.getElementById('icp-comprometido')?.value;
+            let statusComp = '-';
+            if (comp === 'sim') statusComp = 'Total (Comprometido)';
+            else if (comp === 'nao') statusComp = 'Baixo / Curioso';
+            const el = document.getElementById('hdr-comprometimento');
+            if (el) el.innerText = statusComp;
+        }
+
+        function atualizarCabecalhoQualificacaoCompleta() {
+            atualizarCabecalhoNome();
+            atualizarCabecalhoMeta();
+            atualizarCabecalhoPrazo();
+            atualizarCabecalhoCapital();
+            atualizarCabecalhoValorDisponivel();
+            atualizarCabecalhoComprometimento();
         }
 
         // --- UI System ---
@@ -1496,11 +1532,7 @@
             document.getElementById('icp-tem-investimento-agora').value = '';
             document.getElementById('icp-comprometido').value = '';
             
-            atualizarCabecalhoNome();
-            const elDecisor = document.getElementById('hdr-decisor-status');
-            if (elDecisor) elDecisor.innerText = '-';
-            const elCapital = document.getElementById('hdr-capital');
-            if (elCapital) elCapital.innerText = '-';
+            atualizarCabecalhoQualificacaoCompleta();
             
             document.getElementById('result-reagendar-decisor').classList.add('hidden');
             document.getElementById('result-disqualified').classList.add('hidden');
@@ -1651,9 +1683,7 @@
             document.getElementById('icp-tem-investimento-agora').value = lead.temInvestimentoAgora || 'sim';
             document.getElementById('icp-comprometido').value = lead.comprometido || 'sim';
             
-            atualizarCabecalhoNome();
-            atualizarCabecalhoDecisor();
-            atualizarCabecalhoCapital();
+            atualizarCabecalhoQualificacaoCompleta();
 
             const elNome = document.getElementById('call-step1-nome');
             const elNomePes = document.getElementById('call-step1-nome-pes');
