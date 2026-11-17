@@ -1075,47 +1075,53 @@
         // --- Data & State ---
         const whatsappScripts = [
             {
-                group: 'Parte 1: Conexão',
+                group: 'Reembolsos',
+                bg: 'bg-rose-950/20', border: 'border-rose-900/30', color: 'text-rose-400',
+                items: [
+                    { title: 'Instrução de Reembolso', text: '{{contact.first_name}} Vi que você precisa do seu dinheiro de volta, certo?\n\n📧 E-mail: contato@bequestacademy.com.br\n💻 Portal de Membros (FMG): https://membros.bequest.digital/clube/bequest\n💻 Portal de Membros (PVG):https://members.bequestacademy.com.br/pvg/cursos\n💬 Whatsapp: https://links.bequestacademy.com.br/kN5gUC\n\nCopie a mensagem e mande em todos os canais, NO EMAIL, NO PORTAL DE MEMBROS E NO WHATSAPP\n\n QUERO MEU REEMBOLSO!!!' }
+                ]
+            },
+            {
+                group: 'Parte 1: Rapport',
                 bg: 'bg-blue-950/20', border: 'border-blue-900/30', color: 'text-blue-400',
                 items: [
-                    { title: 'Abertura', text: 'Hoje o dia vai ser maravilhoso!\n\nTudo bem {{contact.first_name}}?' },
-                    { title: 'Quebra de Gelo', text: '{{contact.first_name}} nossa aqui tá muito calor...\ncomo ta ai pra você hoje?' },
-                    { title: 'Conexão Local', text: 'Vi aqui que você é de -, qual sua cidade?\n\n(Pesquise curiosidades sobre a região do lead)' }
+                    { title: 'Abertura', text: '(Pesquise curiosidades sobre a região do lead) \n\nHoje o dia vai ser maravilhoso!\nTudo bem {{contact.first_name}}?' },
+                    { title: 'Desconto Wix', text: 'PRIMEIRAMENTE se não resgatou sua loja... Tô com um desconto mais em conta fechou?\n🔗https://manage.wix.com/premium-purchase-plan/dynamo' },
+                    { title: 'Quebra de Gelo (Calor)', text: '{{contact.first_name}} nossa aqui tá muito calor...\ncomo ta ai pra você hoje?' },
+                    { title: 'Prefere Frio?', text: 'E você prefere assim ou prefere o frio?' },
+                    { title: 'Conexão Local', text: 'Poxaaa ótimo saber {{contact.first_name}}, eu tb gosto demais\n\nVi aqui que você é de -, qual sua cidade?' }
                 ]
             },
             {
                 group: 'Parte 2: Qualificação',
                 bg: 'bg-amber-950/20', border: 'border-amber-900/30', color: 'text-amber-400',
                 items: [
-                    { title: 'Setup Inicial', text: 'Vou te fazer algumas perguntas sobre seu Objetivo aqui...\n\nIsso nos ajuda a resolver as dificuldades que você possa enfrentar sem perda de tempo. Tudo bem?!' },
-                    { title: 'Ocupação', text: 'Pra eu entender seu momento: Hoje você trabalha em qual empresa?\n\nJá ouvi falar, ela fica aí na -?' },
-                    { title: 'Se quer Suporte', text: 'Eu também quero resolver, inclusive ao vivo\n\nMas antes preciso entender como te ajudar?!\n\nVou te enviar assim que terminar de fazer as perguntas, combinado?' },
-                    { title: 'Se Trabalha', text: 'Poxa, legal demais {{contact.first_name}}!\nE quanto você quer ganhar acima do que já tira aí com -?' },
-                    { title: 'Se Não Trabalha', text: 'Qual é a sua idade?\n\nPoxa, entendi seu ponto {{contact.first_name}}!\nE de onde vem a renda que você está investindo no Dropshipping nesse momento?' },
-                    { title: 'Sem Números Sólidos', text: 'Massa {{contact.first_name}}, mas ainda sim você não pensa em ganhar nada além do -?' },
-                    { title: 'Com Números Sólidos', text: 'Massa {{contact.first_name}}, sair de - para focar no Drop ganhando R$ - /mês é um excelente objetivo. Dá uma tranquilidade muito boa pra fazer essa transição com calma!\n\nEm quanto tempo você quer atingir esse salário?\n\nInclusive, quanto você vai investir no Drop para alcançar esse faturamento de - em -?\n\nE esse valor de investimento que você tem, tá em dinheiro ou cartão de crédito?\n\nVocê realmente se sente comprometido com o Dropshipping? É seu sonho viver disso ou apenas é uma renda extra pra você?' },
-                    { title: 'Se Não Tem Investimento', text: 'Nem R$ 120,00 reais guardados você tem pra investir? Dá até pra começar sim, mas como o orçamento é enxuto, a gente precisa escolher a estratégia certa pra chegar nos R$ ----' },
-                    { title: 'Quer Reinvestir', text: 'Entendi, sua loja já está vendendo e hoje você então já fatura algo né? Está fazendo quanto por mês?\n\nSó pra eu entender de fato, hoje você é iniciante e certo?\n\nTem ao seu redor alguém que roda Drop e Já faz grana com resultados validados ou só segue a BEQUEST mesmo?\n\nEntendi seu ponto {{contact.first_name}}!\nSe você mesmo sendo total iniciante hoje, não está disposto a se planejar para ter investimento financeiro para o seu negócio próprio que já é sem custo de estoque...\n\nMe dá uma ideia de como você irá montar essa estrutura sozinho, vender sozinho e validar sozinho já que como conversamos aqui você é um total iniciante... Qual seria a sua solução pra crescer no mercado sozinho?' }
+                    { title: 'Setup Inicial', text: 'Vou te fazer algumas perguntas sobre seu Objetivo aqui...\n\nIsso nós ajuda a resolver as dificuldades que você possa enfrentar sem perda de tempo. Tudo bem?!' },
+                    { title: '1- Comprometimento', text: '1- Você está comprometido com o Dropshipping? \nÉ seu sonho viver disso ou apenas é uma renda extra pra você?' },
+                    { title: '2- Meta e Prazo', text: '2- Quanto você deseja alcançar por mês no Dropshipping? E em quantos meses você quer atingir esse salario vendendo todos os dias?' },
+                    { title: '3- Investimento', text: 'Massa {{contact.first_name}}! Focar no Drop ganhando - é um excelente objetivo. Dá pra atingir esse salario com muita tranquilidade e calma! \n\n3- Inclusive, quanto você vai investir no Drop para alcançar esse faturamento de - em -?' },
+                    { title: '4- Dinheiro ou Cartão?', text: 'Poxa,te entendo perfeitamente {{contact.first_name}}! \n\n4- E esse valor de investimento que você tem, tá em dinheiro ou cartão de crédito?' },
+                    { title: 'Conclusão & Cupom', text: 'Bom... seus objetivos me mostram que realmente você está preparado para alcançar sua liberdade financeira {{contact.first_name}}! \n\nLEMBRANDO... Resgatanto o plano Wix Anual hoje! Você ganha mais 3 cursos top\n🎁 Cupom de desconto:\n STARTSELLING!' }
                 ]
             },
             {
                 group: 'Parte 3: CTA',
                 bg: 'bg-emerald-950/20', border: 'border-emerald-900/30', color: 'text-emerald-400',
                 items: [
-                    { title: 'Convite Principal', text: 'Antes de você tomar qualquer decisão, o ideal é a gente trocar uma ideia rápida de 15 minutos numa reunião pra olhar o seu caso e ver se realmente é viável pra você rodar essa loja agora.' },
-                    { title: 'Não Decisor Final', text: 'Mas preciso dos seus pais presentes!\n\nNão necessariamente precisam participar da reunião toda, mas no início sim!' },
-                    { title: 'Decisor Final', text: 'Posso te ligar ou prefere agendar uma call de Diagnóstico e Análise de loja?\n\nTem tempo disponível hoje ou amanhã?\n\nTenho horário, às -.\n\nAgendado, te aguardo às -...\nTraga suas objeções e dúvidas pois é um passo muito relevante para o seu faturamento mensal daqui pra frente! Até lá...' }
+                    { title: 'Convite Principal', text: 'Antes de você tomar qualquer decisão, o ideal é a gente trocar uma ideia rápida de 15 minutos numa reunião pra olhar o seu caso e ver se realmente é viável pra você rodar essa loja agora.\n\nTem tempo disponível hoje ou amanhã?' },
+                    { title: 'Não Decisor Final', text: 'Mas preciso dos seus pais presentes!\n\n Não necessariamente precisam participar da reunião toda, mas no inicio sim!' },
+                    { title: 'Agendar c/ Decisor', text: 'Tem tempo disponível de segunda a sexta ou fim de semana? \n\n Tenho horário, às -.\n\n Agendado, te aguardo ás -...\nTraga sua objeções e duvidas pois é um passo muito relevante para o seu faturamento mensal daqui pra frente! Até lá...' }
                 ]
             },
             {
-                group: 'Follow-ups e Desculpas',
+                group: 'Follow-ups',
                 bg: 'bg-purple-950/20', border: 'border-purple-900/30', color: 'text-purple-400',
                 items: [
                     { title: 'Lembrete Padrão', text: 'Passando só pra lembrar sua Análise de Loja. Vamos olhar para o momento da sua loja e entender quais próximos passos fazem mais sentido para você.\nEstamos combinados?' },
-                    { title: 'Lembrete Urgente', text: 'Tá confirmado: seu horário, hoje às -.\nPassando pra avisar que sua presença é muito importante.\nEstamos combinados?' },
+                    { title: 'Lembrete Urgente', text: 'Tá confirmado: seu horário, hoje às -. \nPassando pra avisar que sua presença é muito importante.\nEstamos combinados?' },
                     { title: 'Fora do Horário', text: 'Hoje não conseguimos te atender porque a reunião foi marcada fora do meu horário de atendimento.' },
-                    { title: 'Imprevisto Consultor', text: 'Tínhamos uma call agendada, tive um imprevisto, não consegui chegar a tempo no escritório.\n\nFaz sentido pra você reagendar e resolver o seu problema?' },
-                    { title: 'Feriado', text: 'Tínhamos uma call agendada no feriado, não estávamos trabalhando no dia.\n\nFaz sentido pra você reagendar e resolver o seu problema?' }
+                    { title: 'Imprevisto', text: 'Tínhamos uma call agendada tive um imprevisto, não consegui chegar a tempo no escritório\n\n Faz sentido pra você, reagendar e resolver o seu problema?' },
+                    { title: 'Feriado', text: 'Tínhamos uma call agendada no feriado, não estávamos trabalhando no dia. \n\nFaz sentido pra você, reagendar e resolver o seu problema?' }
                 ]
             }
         ];
@@ -1575,20 +1581,8 @@
         function renderWhatsappScripts() {
             const container = document.getElementById('wpp-scripts-container');
             
-            const leftGroups = [];
-            const rightGroups = [];
-
-            whatsappScripts.forEach((group, index) => {
-                const isLeft = group.group.includes('Parte 1') || group.group.includes('Parte 2');
-                if (isLeft) {
-                    leftGroups.push({ group, originalIndex: index });
-                } else {
-                    rightGroups.push({ group, originalIndex: index });
-                }
-            });
-
-            const renderCardGroup = ({ group, originalIndex }) => `
-                <div class="${group.bg} border ${group.border} rounded-xl p-4 space-y-3">
+            const renderCardGroup = (group, originalIndex) => `
+                <div class="${group.bg} border ${group.border} rounded-xl p-4 space-y-3 h-fit break-inside-avoid">
                     <div class="flex items-center justify-between border-b ${group.border} pb-2">
                         <h4 class="${group.color} text-[11px] font-black uppercase tracking-wider">${group.group}</h4>
                         <span class="text-[9px] text-slate-500 uppercase font-semibold">${group.items.length} mensagens</span>
@@ -1609,14 +1603,7 @@
                 </div>
             `;
 
-            container.innerHTML = `
-                <div class="flex flex-col gap-4">
-                    ${leftGroups.map(renderCardGroup).join('')}
-                </div>
-                <div class="flex flex-col gap-4">
-                    ${rightGroups.map(renderCardGroup).join('')}
-                </div>
-            `;
+            container.innerHTML = whatsappScripts.map((group, index) => renderCardGroup(group, index)).join('');
         }
 
         function copiarScriptWpp(groupIndex, itemIndex) {
