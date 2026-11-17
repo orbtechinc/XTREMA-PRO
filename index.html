@@ -1129,6 +1129,7 @@
         ];
 
         const diagnosisLevels = [
+            { id: 1, title: '1. Inconsciente', action: 'EXPLORAÇÃO: Investigar a fundo a ambição do lead e onde ele quer chegar.' },
             { id: 2, title: '2. Consciente do Problema', action: 'AMPLIAÇÃO: Aprofundar o impacto do problema e o custo de permanecer na situação atual.' },
             { id: 3, title: '3. Consciente da Solução', action: 'STORYTELLING: Usar histórias/exemplos para apresentar a lógica da solução.' },
             { id: 4, title: '4. Consciente do Produto', action: 'APRESENTAÇÃO: Explicar o produto, estrutura e entregáveis.' },
@@ -1820,8 +1821,8 @@
                                 ${lead.metaMensal ? `<p class="text-xs text-purple-300 font-medium flex items-center gap-1"><i data-lucide="target" class="w-3 h-3 text-purple-400"></i> Meta: ${lead.metaMensal}${lead.prazo ? ` em ${lead.prazo}` : ''}</p>` : ''}
                                 <p class="text-xs text-amber-400 font-medium flex items-center gap-1"><i data-lucide="dollar-sign" class="w-3 h-3"></i> ${lead.capital || 'Não especificado'} (${verbaAgoraTxt})</p>
                                 ${lead.detalheRapport ? `<p class="text-xs text-slate-300 italic flex items-center gap-1 max-w-md truncate" title="${lead.detalheRapport}"><i data-lucide="sparkles" class="w-3 h-3 text-amber-400 shrink-0"></i> ${lead.detalheRapport}</p>` : ''}
-                                ${isReagendado ? `<p class="text-xs text-blue-300 font-bold flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3 text-blue-400"></i> Remarcado para: ${dataFormatadaReagendamento}</p>` : ''}
                             </div>
+                            ${isReagendado ? `<div class="mt-2.5"><span class="inline-flex items-center gap-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/50 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_15px_rgba(225,29,72,0.3)]"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> FOLLOWUP URGENTE: ${dataFormatadaReagendamento}</span></div>` : ''}
                         </div>
                     </div>
                     <div class="flex items-center gap-2 w-full md:w-auto shrink-0">
@@ -1908,6 +1909,51 @@
             else if (lead.temInvestimentoAgora === 'nao') verbaStatusStr = 'a ser liberado';
             if (elCapital) elCapital.innerText = `${lead.capital || 'R$ 300'} (${verbaStatusStr})`;
 
+            // Restaurar dados preenchidos de reuniões reagendadas
+            if (lead.diagState) {
+                if (document.getElementById('qual-ambicao')) document.getElementById('qual-ambicao').value = lead.diagState.ambicao || '';
+                if (document.getElementById('diag-q2')) document.getElementById('diag-q2').value = lead.diagState.dor || '';
+                if (document.getElementById('diag-q3')) document.getElementById('diag-q3').value = lead.diagState.solucao || '';
+                if (document.getElementById('diag-q5-tc')) document.getElementById('diag-q5-tc').checked = lead.diagState.tc || false;
+                if (document.getElementById('client-notes')) document.getElementById('client-notes').value = lead.diagState.notas || '';
+                
+                const sonhotext = document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]');
+                if (sonhotext) sonhotext.value = lead.diagState.sonho || '';
+                
+                const transfText = document.querySelector('#step-3 textarea[oninput*="hdr-transformacao"]');
+                if (transfText) transfText.value = lead.diagState.transformacao || '';
+                
+                if (document.getElementById('calc-hora')) document.getElementById('calc-hora').value = lead.diagState.calcHora || '';
+                if (document.getElementById('calc-mult')) document.getElementById('calc-mult').value = lead.diagState.calcMult || '';
+                
+                checkState = lead.diagState.checkState ? {...lead.diagState.checkState} : { sim1: false, sim2: false, sim3: false };
+                renderChecks();
+                processarDiagnostico();
+                if (typeof calcularAncoragem === 'function') calcularAncoragem();
+
+                document.getElementById('hdr-sonho').innerText = lead.diagState.sonho || '-';
+                document.getElementById('hdr-transformacao').innerText = lead.diagState.transformacao || '-';
+            } else {
+                // Limpa caso o lead seja novo e não tenha estado salvo
+                if (document.getElementById('qual-ambicao')) document.getElementById('qual-ambicao').value = '';
+                if (document.getElementById('diag-q2')) document.getElementById('diag-q2').value = '';
+                if (document.getElementById('diag-q3')) document.getElementById('diag-q3').value = '';
+                if (document.getElementById('diag-q5-tc')) document.getElementById('diag-q5-tc').checked = false;
+                if (document.getElementById('client-notes')) document.getElementById('client-notes').value = '';
+                const sonhotext = document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]');
+                if (sonhotext) sonhotext.value = '';
+                const transfText = document.querySelector('#step-3 textarea[oninput*="hdr-transformacao"]');
+                if (transfText) transfText.value = '';
+                if (document.getElementById('calc-hora')) document.getElementById('calc-hora').value = '';
+                if (document.getElementById('calc-mult')) document.getElementById('calc-mult').value = '';
+                checkState = { sim1: false, sim2: false, sim3: false };
+                renderChecks();
+                processarDiagnostico();
+                if (typeof calcularAncoragem === 'function') calcularAncoragem();
+                document.getElementById('hdr-sonho').innerText = '-';
+                document.getElementById('hdr-transformacao').innerText = '-';
+            }
+
             const tempoAcumulado = lead.tempoAcumulado || 0;
             callStartTime = Date.now() - (tempoAcumulado * 1000);
 
@@ -1985,27 +2031,40 @@
             
             document.getElementById('btn-start-call-sidebar').classList.remove('hidden');
             
-            let leadProcessado = null;
+            let leadAntigo = {};
             if (leadAtivoIndex !== null && leadAtivoIndex >= 0 && leadAtivoIndex < leadsConfirmados.length) {
-                leadProcessado = leadsConfirmados[leadAtivoIndex];
+                leadAntigo = leadsConfirmados[leadAtivoIndex];
                 leadsConfirmados.splice(leadAtivoIndex, 1);
-            } else {
-                leadProcessado = {
-                    nome: document.getElementById('icp-nome').value || 'Lead Sem Nome',
-                    cidade: document.getElementById('icp-cidade') ? document.getElementById('icp-cidade').value : '',
-                    detalheRapport: document.getElementById('icp-detalhe-rapport') ? document.getElementById('icp-detalhe-rapport').value : '',
-                    ocupacaoStatus: document.getElementById('icp-ocupacao-status').value || 'sim',
-                    decisorStatus: document.getElementById('icp-decisor-status').value || 'sim',
-                    metaMensal: document.getElementById('icp-meta-mensal') ? document.getElementById('icp-meta-mensal').value : '',
-                    prazo: document.getElementById('icp-prazo') ? document.getElementById('icp-prazo').value : '',
-                    capital: document.getElementById('icp-capital').value || '',
-                    temInvestimentoAgora: document.getElementById('icp-tem-investimento-agora').value || 'sim',
-                    comprometido: document.getElementById('icp-comprometido').value || '3',
-                    historicoDocId: leadAtivoOriginalDocId || null
-                };
             }
 
-            const docIdOriginal = leadAtivoOriginalDocId || (leadProcessado ? leadProcessado.historicoDocId : null);
+            let leadProcessado = {
+                ...leadAntigo,
+                nome: document.getElementById('icp-nome').value || leadAntigo.nome || 'Lead Sem Nome',
+                cidade: document.getElementById('icp-cidade') ? document.getElementById('icp-cidade').value : leadAntigo.cidade || '',
+                detalheRapport: document.getElementById('icp-detalhe-rapport') ? document.getElementById('icp-detalhe-rapport').value : leadAntigo.detalheRapport || '',
+                ocupacaoStatus: document.getElementById('icp-ocupacao-status').value || leadAntigo.ocupacaoStatus || 'sim',
+                decisorStatus: document.getElementById('icp-decisor-status').value || leadAntigo.decisorStatus || 'sim',
+                metaMensal: document.getElementById('icp-meta-mensal') ? document.getElementById('icp-meta-mensal').value : leadAntigo.metaMensal || '',
+                prazo: document.getElementById('icp-prazo') ? document.getElementById('icp-prazo').value : leadAntigo.prazo || '',
+                capital: document.getElementById('icp-capital').value || leadAntigo.capital || '',
+                temInvestimentoAgora: document.getElementById('icp-tem-investimento-agora').value || leadAntigo.temInvestimentoAgora || 'sim',
+                comprometido: document.getElementById('icp-comprometido').value || leadAntigo.comprometido || '3',
+                historicoDocId: leadAtivoOriginalDocId || leadAntigo.historicoDocId || null,
+                diagState: {
+                    ambicao: document.getElementById('qual-ambicao').value || '',
+                    dor: document.getElementById('diag-q2').value || '',
+                    solucao: document.getElementById('diag-q3').value || '',
+                    tc: document.getElementById('diag-q5-tc') ? document.getElementById('diag-q5-tc').checked : false,
+                    notas: document.getElementById('client-notes').value || '',
+                    sonho: document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]')?.value || '',
+                    transformacao: document.querySelector('#step-3 textarea[oninput*="hdr-transformacao"]')?.value || '',
+                    calcHora: document.getElementById('calc-hora')?.value || '',
+                    calcMult: document.getElementById('calc-mult')?.value || '',
+                    checkState: {...checkState}
+                }
+            };
+
+            const docIdOriginal = leadAtivoOriginalDocId || leadProcessado.historicoDocId || null;
 
             if (statusCanonico === 'Reagendado') {
                 const leadReagendado = {
@@ -2229,16 +2288,35 @@
                 if (document.getElementById('diag-q4')) document.getElementById('diag-q4').disabled = !val3;
             }
 
-            if (val3) { level = 3; levelName = '3. Consciente da Solução'; document.getElementById('recom-produto').innerHTML = `Se a solução que ele imagina é: "<strong class="text-white">${val3}</strong>", faça a ponte lógica com o seu produto agora.`; } else { document.getElementById('recom-produto').innerText = 'Aguardando diagnóstico do Nível 3 (CSS)...'; }
-            if (val4) { level = 4; levelName = '4. Consciente do Produto'; }
+            let level = 1;
+            let levelName = '1. INC (Inconsciente)';
+
+            if (val1) {
+                level = 2;
+                levelName = '2. CP (Consciente do Problema)';
+            }
+
+            if (val3) { 
+                level = 3; 
+                levelName = '3. CS (Consciente da Solução)'; 
+                document.getElementById('recom-produto').innerHTML = `Se a solução que ele imagina é: "<strong class="text-white">${val3}</strong>", faça a ponte lógica com o seu produto agora.`; 
+            } else { 
+                document.getElementById('recom-produto').innerText = 'Aguardando diagnóstico do Nível 3 (CS)...'; 
+            }
+            
+            if (val4) { 
+                level = 4; 
+                levelName = '4. CPRO (Consciente do Produto)'; 
+            }
             
             if (isTc) {
                 level = 5;
-                levelName = '5. Total Consciente';
+                levelName = '5. TC (Total Consciente)';
             }
 
             document.getElementById('hdr-nivel').innerText = levelName;
-            document.getElementById('diag-action-text').innerText = diagnosisLevels.find(l => l.id === level).action;
+            const diagAction = diagnosisLevels.find(l => l.id === level);
+            document.getElementById('diag-action-text').innerText = diagAction ? diagAction.action : 'ESTRUTURA: Crie um plano de ação baseado na estrutura da solução que voce tem pra ele.';
             activeDiagLevel = level;
         }
 
