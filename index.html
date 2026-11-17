@@ -656,8 +656,10 @@
                             <span class="text-slate-400 text-[10px] font-bold uppercase mb-1">10. Comprometido?</span>
                             <select id="icp-comprometido" onchange="atualizarCabecalhoComprometimento(); verificarQualificacao();" class="bg-slate-900/70 border border-slate-700 rounded p-2 text-xs text-white focus:border-blue-500 outline-none w-full cursor-pointer">
                                 <option value="" disabled selected>Selecione</option>
-                                <option value="sim">Sim (Compromisso Total)</option>
-                                <option value="nao">Não (Curioso / Indeciso)</option>
+                                <option value="1">Nível 1 - Baixo (Frio / Curioso)</option>
+                                <option value="2">Nível 2 - Moderado (Morno / Maturação)</option>
+                                <option value="3">Nível 3 - Alto (Quente / Qualificado)</option>
+                                <option value="4">Nível 4 - Máximo (Prioridade / Pronto)</option>
                             </select>
                         </div>
                     </div>
@@ -682,19 +684,19 @@
                     </div>
 
                     <div id="result-low-commitment" class="hidden bg-orange-950/40 border border-orange-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
-                        <div class="flex items-center gap-2 text-orange-400 font-bold text-sm">
-                            <i data-lucide="thermometer-snowflake" class="w-5 h-5"></i> Lead Frio / Sem Comprometimento ou Sem Verba Imediata
+                        <div id="low-commit-title" class="flex items-center gap-2 text-orange-400 font-bold text-sm">
+                            <i data-lucide="thermometer-snowflake" class="w-5 h-5"></i> Lead Frio / Sem Verba Imediata
                         </div>
-                        <p class="text-orange-300/70 text-xs mb-2">O lead não possui a intenção ou compromisso de agir, ou não possui valor disponível agora.</p>
+                        <p id="low-commit-desc" class="text-orange-300/70 text-xs mb-2">O lead não possui a intenção ou compromisso de agir, ou não possui valor disponível agora.</p>
                         <button onclick="resetQualificacao(); showSystemToast('Movido para nutrição.');" class="bg-orange-600 hover:bg-orange-500 text-white px-6 py-2 rounded-lg text-xs font-bold transition-colors shadow-lg shadow-orange-900/20">Mover para Nutrição (CRM)</button>
                     </div>
 
                     <div id="result-qualified" class="hidden bg-emerald-950/30 border border-emerald-900/50 rounded-xl p-5 text-center animate-fade-in flex flex-col items-center gap-3">
-                        <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                        <div id="qual-title" class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
                             <i data-lucide="check-circle-2" class="w-5 h-5"></i> Lead 100% Qualificado
                         </div>
-                        <p class="text-emerald-300/70 text-xs mb-2">Decisor ativo, com valor disponível agora e comprometimento confirmado. Pronto para a call.</p>
-                        <button onclick="salvarLeadConfirmado()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/20 animate-pulse">Confirmar Call & Salvar em Oportunidades</button>
+                        <p id="qual-desc" class="text-emerald-300/70 text-xs mb-2">Decisor ativo, com valor disponível agora e comprometimento confirmado. Pronto para a call.</p>
+                        <button onclick="salvarLeadConfirmado()" id="btn-salvar-qual" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/20 animate-pulse">Confirmar Call & Salvar em Oportunidades</button>
                     </div>
                 </div>
 
@@ -744,9 +746,14 @@
 
                 <!-- Histórico CRM Integrado -->
                 <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 relative shadow-lg">
-                    <div class="flex items-center gap-2 mb-4">
-                        <h3 class="text-sm font-bold text-white">Histórico Recente de Calls (CRM)</h3>
-                        <span id="crm-status" class="bg-amber-500/20 text-amber-500 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1"><i data-lucide="wifi" class="w-3 h-3"></i> Sincronizando...</span>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-bold text-white">Histórico Recente de Calls (CRM)</h3>
+                            <span id="crm-status" class="bg-amber-500/20 text-amber-500 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1"><i data-lucide="wifi" class="w-3 h-3"></i> Sincronizando...</span>
+                        </div>
+                        <button onclick="exportarICPsEmLote()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 border border-slate-600 shadow-md">
+                            <i data-lucide="copy-check" class="w-4 h-4 text-emerald-400"></i> Copiar ICPs (Lote)
+                        </button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-slate-400">
@@ -1143,6 +1150,7 @@
         
         let timerInterval;
         let seconds = 0;
+        let callStartTime = 0;
         let isTimerRunning = false;
         
         let statusPendenteCheckout = '';
@@ -1361,7 +1369,11 @@
         function atualizarCabecalhoComprometimento() {
             const comp = document.getElementById('icp-comprometido')?.value;
             let statusComp = '-';
-            if (comp === 'sim') statusComp = 'Total (Comprometido)';
+            if (comp === '1') statusComp = 'N1 - Frio';
+            else if (comp === '2') statusComp = 'N2 - Morno';
+            else if (comp === '3') statusComp = 'N3 - Quente';
+            else if (comp === '4') statusComp = 'N4 - Máximo';
+            else if (comp === 'sim') statusComp = 'Total (Comprometido)';
             else if (comp === 'nao') statusComp = 'Baixo / Curioso';
             const el = document.getElementById('hdr-comprometimento');
             if (el) el.innerText = statusComp;
@@ -1398,12 +1410,144 @@
             }, 3000);
         }
 
+        function salvarEstadoCallLocal() {
+            if (!isTimerRunning) return;
+            const state = {
+                callStartTime,
+                leadAtivoIndex,
+                leadAtivoOriginalDocId,
+                activeStep,
+                activeDiagLevel,
+                inputs: {
+                    'icp-nome': document.getElementById('icp-nome').value,
+                    'icp-cidade': document.getElementById('icp-cidade')?.value,
+                    'icp-detalhe-rapport': document.getElementById('icp-detalhe-rapport')?.value,
+                    'icp-ocupacao-status': document.getElementById('icp-ocupacao-status').value,
+                    'icp-decisor-status': document.getElementById('icp-decisor-status').value,
+                    'icp-meta-mensal': document.getElementById('icp-meta-mensal')?.value,
+                    'icp-prazo': document.getElementById('icp-prazo')?.value,
+                    'icp-capital': document.getElementById('icp-capital').value,
+                    'icp-tem-investimento-agora': document.getElementById('icp-tem-investimento-agora').value,
+                    'icp-comprometido': document.getElementById('icp-comprometido').value,
+                    'qual-ambicao': document.getElementById('qual-ambicao').value,
+                    'diag-q2': document.getElementById('diag-q2').value,
+                    'diag-q3': document.getElementById('diag-q3').value,
+                    'diag-q4': document.getElementById('diag-q4')?.value,
+                    'client-notes': document.getElementById('client-notes').value,
+                    'hdr-sonho': document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]')?.value,
+                    'hdr-transformacao': document.querySelector('#step-3 textarea[oninput*="hdr-transformacao"]')?.value,
+                    'calc-hora': document.getElementById('calc-hora')?.value,
+                    'calc-mult': document.getElementById('calc-mult')?.value
+                },
+                checkState: checkState
+            };
+            try {
+                localStorage.setItem('xtrema_active_call_state', JSON.stringify(state));
+            } catch (e) {}
+        }
+
+        function restaurarCallSeExistir() {
+            try {
+                const saved = localStorage.getItem('xtrema_active_call_state');
+                if (saved) {
+                    const state = JSON.parse(saved);
+                    
+                    callStartTime = state.callStartTime;
+                    leadAtivoIndex = state.leadAtivoIndex;
+                    leadAtivoOriginalDocId = state.leadAtivoOriginalDocId;
+                    checkState = state.checkState || { sim1: false, sim2: false };
+                    
+                    for (const [id, value] of Object.entries(state.inputs || {})) {
+                        const el = document.getElementById(id);
+                        if (el) el.value = value || '';
+                        
+                        if (id === 'hdr-sonho') {
+                            const elArea = document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]');
+                            if(elArea) elArea.value = value || '';
+                        }
+                        if (id === 'hdr-transformacao') {
+                            const elArea = document.querySelector('#step-3 textarea[oninput*="hdr-transformacao"]');
+                            if(elArea) elArea.value = value || '';
+                        }
+                    }
+
+                    atualizarCabecalhoQualificacaoCompleta();
+                    processarDiagnostico();
+                    if (typeof calcularAncoragem === 'function') calcularAncoragem();
+                    renderChecks();
+                    
+                    const leadNome = state.inputs['icp-nome'] || 'Parceiro';
+                    const leadCidade = state.inputs['icp-cidade'] || '';
+                    const leadRapport = state.inputs['icp-detalhe-rapport'] || '';
+                    
+                    const elNome = document.getElementById('call-step1-nome');
+                    const elNomePes = document.getElementById('call-step1-nome-pes');
+                    const elNomeDono = document.getElementById('call-step1-nome-dono');
+                    const elConexao = document.getElementById('call-step1-conexao');
+                    const elMeta = document.getElementById('call-step1-meta');
+                    const elPrazo = document.getElementById('call-step1-prazo');
+                    const elMetaPitch = document.getElementById('call-step1-meta-pitch');
+                    const elPrazoPitch = document.getElementById('call-step1-prazo-pitch');
+                    const elCapital = document.getElementById('call-step1-capital');
+
+                    if (elNome) elNome.innerText = leadNome;
+                    if (elNomePes) elNomePes.innerText = leadNome;
+                    if (elNomeDono) elNomeDono.innerText = leadNome;
+                    if (elConexao) elConexao.innerText = leadRapport || (leadCidade ? `sua rotina aí em ${leadCidade}` : 'nossa conversa anterior');
+                    
+                    const metaTexto = state.inputs['icp-meta-mensal'] || 'sua meta financeira';
+                    const prazoTexto = state.inputs['icp-prazo'] || 'curto prazo';
+                    if (elMeta) elMeta.innerText = metaTexto;
+                    if (elPrazo) elPrazo.innerText = prazoTexto;
+                    if (elMetaPitch) elMetaPitch.innerText = metaTexto;
+                    if (elPrazoPitch) elPrazoPitch.innerText = prazoTexto;
+
+                    let verbaStatusStr = 'em mãos';
+                    const temInv = state.inputs['icp-tem-investimento-agora'];
+                    if (temInv === 'pix') verbaStatusStr = 'já disponível via Pix';
+                    else if (temInv === 'credito') verbaStatusStr = 'no limite do cartão de crédito';
+                    else if (temInv === 'nao') verbaStatusStr = 'a ser liberado';
+                    if (elCapital) elCapital.innerText = `${state.inputs['icp-capital'] || 'R$ 300'} (${verbaStatusStr})`;
+
+                    clearInterval(timerInterval);
+                    isTimerRunning = true;
+                    isCallLocked = false;
+                    
+                    document.getElementById('static-insight-panel').classList.remove('hidden');
+                    document.getElementById('static-insight-panel').classList.add('flex');
+                    document.getElementById('btn-abort-call').classList.remove('hidden');
+                    document.getElementById('btn-abort-call').classList.add('flex');
+                    document.getElementById('btn-start-call-sidebar').classList.add('hidden');
+                    
+                    const btnTimer = document.getElementById('btn-timer');
+                    btnTimer.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Em Reunião`;
+                    btnTimer.className = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2";
+
+                    goToView('flow');
+                    goToStep(state.activeStep || 1);
+
+                    timerInterval = setInterval(() => {
+                        const now = Date.now();
+                        seconds = Math.floor((now - callStartTime) / 1000);
+                        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                        const s = (seconds % 60).toString().padStart(2, '0');
+                        document.getElementById('call-timer').innerText = `${m}:${s}`;
+                        
+                        salvarEstadoCallLocal();
+                    }, 1000);
+                    
+                    showSystemToast("Reunião em andamento restaurada!");
+                }
+            } catch (e) {}
+        }
+
         function initUI() {
             renderSidebar();
             renderChecks();
             renderWhatsappScripts(); 
             lucide.createIcons();
             goToView('dashboard');
+            restaurarCallSeExistir();
         }
 
         // --- WhatsApp Scripts Logic ---
@@ -1497,7 +1641,7 @@
             let isFinanceiroOk = capital >= 100;
             let isDisponibilidadeOk = (temInvestimentoAgora === 'pix' || temInvestimentoAgora === 'credito');
             let isDecisorOk = decisor === 'sim';
-            let isComprometidoOk = comprometido === 'sim';
+            let isComprometidoOk = (comprometido === '3' || comprometido === '4' || comprometido === 'sim');
 
             document.getElementById('result-disqualified').classList.add('hidden');
             document.getElementById('result-reagendar-decisor').classList.add('hidden');
@@ -1511,13 +1655,42 @@
                 else if (!isFinanceiroOk && document.getElementById('icp-capital').value !== '') {
                     document.getElementById('result-disqualified').classList.remove('hidden');
                 } 
-                else if ((!isComprometidoOk && comprometido === 'nao') || (!isDisponibilidadeOk && temInvestimentoAgora === 'nao')) {
+                else if ((!isComprometidoOk && (comprometido === '1' || comprometido === '2' || comprometido === 'nao')) || (!isDisponibilidadeOk && temInvestimentoAgora === 'nao')) {
+                    const titleEl = document.getElementById('low-commit-title');
+                    const descEl = document.getElementById('low-commit-desc');
+                    
+                    if (comprometido === '1' || comprometido === 'nao') {
+                        titleEl.innerHTML = '<i data-lucide="thermometer-snowflake" class="w-5 h-5"></i> Nível 1 - Baixo / Frio (Não Qualificado)';
+                        descEl.innerText = 'O lead demonstra curiosidade, mas não apresenta prioridade ou disposição para iniciar. Não agendar call.';
+                    } else if (comprometido === '2') {
+                        titleEl.innerHTML = '<i data-lucide="thermometer" class="w-5 h-5"></i> Nível 2 - Moderado / Morno (Em Maturação)';
+                        descEl.innerText = 'Tem interesse real, mas ainda apresenta resistência em assumir compromisso. Continuar nutrindo e reavaliar.';
+                    } else {
+                        titleEl.innerHTML = '<i data-lucide="wallet" class="w-5 h-5"></i> Sem Valor Disponível Imediato';
+                        descEl.innerText = 'O lead está comprometido, mas não possui valor disponível agora. Mover para nutrição.';
+                    }
+                    
                     document.getElementById('result-low-commitment').classList.remove('hidden');
                 } 
                 else if (isFinanceiroOk && isDisponibilidadeOk && isDecisorOk && isComprometidoOk) {
+                    const titleEl = document.getElementById('qual-title');
+                    const descEl = document.getElementById('qual-desc');
+                    const btnSalvar = document.getElementById('btn-salvar-qual');
+                    
+                    if (comprometido === '4') {
+                        titleEl.innerHTML = '<i data-lucide="flame" class="w-5 h-5 text-amber-500"></i> Nível 4 - Prioridade Comercial Máxima';
+                        descEl.innerText = 'O lead possui urgência, disponibilidade e intenção concreta de começar. Agendar com prioridade!';
+                        btnSalvar.className = "bg-amber-500 hover:bg-amber-400 text-slate-900 px-8 py-2.5 rounded-lg text-sm font-black transition-colors shadow-lg shadow-amber-900/20 animate-pulse";
+                    } else {
+                        titleEl.innerHTML = '<i data-lucide="check-circle-2" class="w-5 h-5"></i> Nível 3 - Lead Qualificado (Quente)';
+                        descEl.innerText = 'O lead possui objetivo definido, reconhece a importância e demonstra disposição para executar. Pronto para a call.';
+                        btnSalvar.className = "bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/20 animate-pulse";
+                    }
+                    
                     document.getElementById('result-qualified').classList.remove('hidden');
                 }
             }
+            lucide.createIcons();
         }
 
         function resetQualificacao() {
@@ -1550,7 +1723,7 @@
             const prazo = document.getElementById('icp-prazo') ? document.getElementById('icp-prazo').value : '';
             const capital = document.getElementById('icp-capital').value || '';
             const temInvestimentoAgora = document.getElementById('icp-tem-investimento-agora').value || 'pix';
-            const comprometido = document.getElementById('icp-comprometido').value || 'sim';
+            const comprometido = document.getElementById('icp-comprometido').value || '3';
 
             leadsConfirmados.push({ 
                 nome, 
@@ -1637,7 +1810,7 @@
                         <button onclick="registrarNoShow(${index})" class="flex-1 md:flex-none bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/40 px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex justify-center items-center gap-1.5" title="Registrar como No-Show (Lead não compareceu)">
                             <i data-lucide="user-x" class="w-3.5 h-3.5 text-rose-500"></i> No-Show
                         </button>
-                        <button onclick="iniciarCallConfirmada(${index})" class="flex-1 md:flex-none ${isReagendado ? 'bg-blue-600 hover:bg-blue-500' : 'bg-emerald-600 hover:bg-emerald-500'} text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors flex justify-center items-center gap-2 shadow-lg">
+                        <button onclick="iniciarCallConfirmada(${index})" class="flex-1 md:flex-none ${isReagendado ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} px-5 py-2 rounded-lg text-sm font-bold transition-colors flex justify-center items-center gap-2 shadow-lg">
                             <i data-lucide="phone-call" class="w-4 h-4"></i> Iniciar Call
                         </button>
                     </div>
@@ -1681,7 +1854,11 @@
             if (document.getElementById('icp-prazo')) document.getElementById('icp-prazo').value = lead.prazo || '';
             document.getElementById('icp-capital').value = lead.capital || '';
             document.getElementById('icp-tem-investimento-agora').value = lead.temInvestimentoAgora || 'sim';
-            document.getElementById('icp-comprometido').value = lead.comprometido || 'sim';
+            
+            let compValue = lead.comprometido || '3';
+            if (compValue === 'sim') compValue = '3';
+            if (compValue === 'nao') compValue = '1';
+            document.getElementById('icp-comprometido').value = compValue;
             
             atualizarCabecalhoQualificacaoCompleta();
 
@@ -1713,6 +1890,9 @@
             else if (lead.temInvestimentoAgora === 'nao') verbaStatusStr = 'a ser liberado';
             if (elCapital) elCapital.innerText = `${lead.capital || 'R$ 300'} (${verbaStatusStr})`;
 
+            const tempoAcumulado = lead.tempoAcumulado || 0;
+            callStartTime = Date.now() - (tempoAcumulado * 1000);
+
             goToView('flow');
             isCallLocked = false; 
             
@@ -1727,25 +1907,36 @@
             goToStep(1);
 
             clearInterval(timerInterval);
-            seconds = 0;
+            seconds = tempoAcumulado;
             isTimerRunning = true;
-            document.getElementById('call-timer').innerText = "00:00";
+            
+            const mInicial = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const sInicial = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('call-timer').innerText = `${mInicial}:${sInicial}`;
             
             const btnTimer = document.getElementById('btn-timer');
             btnTimer.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Em Reunião`;
             btnTimer.className = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2";
 
             timerInterval = setInterval(() => {
-                seconds++;
+                const now = Date.now();
+                seconds = Math.floor((now - callStartTime) / 1000);
                 const m = Math.floor(seconds / 60).toString().padStart(2, '0');
                 const s = (seconds % 60).toString().padStart(2, '0');
                 document.getElementById('call-timer').innerText = `${m}:${s}`;
+                
+                salvarEstadoCallLocal();
             }, 1000);
         }
 
         function stopTimer(statusDaCall, valorFinal = 0, dataReagendamento = null) {
+            if (isTimerRunning && callStartTime > 0) {
+                seconds = Math.floor((Date.now() - callStartTime) / 1000);
+            }
             clearInterval(timerInterval);
             isTimerRunning = false;
+            
+            localStorage.removeItem('xtrema_active_call_state');
             
             const statusCanonico = (statusDaCall === 'Ganho' || statusDaCall === 'Perdido' || statusDaCall === 'Reagendado') 
                 ? statusDaCall 
@@ -1791,7 +1982,7 @@
                     prazo: document.getElementById('icp-prazo') ? document.getElementById('icp-prazo').value : '',
                     capital: document.getElementById('icp-capital').value || '',
                     temInvestimentoAgora: document.getElementById('icp-tem-investimento-agora').value || 'sim',
-                    comprometido: document.getElementById('icp-comprometido').value || 'sim',
+                    comprometido: document.getElementById('icp-comprometido').value || '3',
                     historicoDocId: leadAtivoOriginalDocId || null
                 };
             }
@@ -1803,7 +1994,8 @@
                     ...leadProcessado,
                     capital: valorFinal > 0 ? `R$ ${valorFinal.toLocaleString('pt-BR')}` : (leadProcessado.capital || 'A definir'),
                     reagendadoEm: dataReagendamento || new Date().toISOString(),
-                    historicoDocId: docIdOriginal || null
+                    historicoDocId: docIdOriginal || null,
+                    tempoAcumulado: seconds
                 };
                 leadsConfirmados.unshift(leadReagendado);
             }
@@ -1839,9 +2031,13 @@
         function abortarCall() {
             clearInterval(timerInterval);
             isTimerRunning = false;
+            
+            localStorage.removeItem('xtrema_active_call_state');
+            
             leadAtivoIndex = null;
             leadAtivoOriginalDocId = null;
             seconds = 0;
+            callStartTime = 0;
             document.getElementById('call-timer').innerText = "00:00";
 
             const btnTimer = document.getElementById('btn-timer');
@@ -2093,6 +2289,9 @@
 
         window.callsHistoricoCache = {};
 
+        // Helper para limpar textos pro Excel (TSV)
+        const cleanTsv = (str) => String(str || '-').replace(/\t|\n|\r/g, ' ').trim();
+
         window.copiarICPHistorico = function(callId) {
             const call = window.callsHistoricoCache[callId];
             if (!call) {
@@ -2107,7 +2306,7 @@
             const raw = icp.respostasBrutas || {};
 
             const nome = pre.nome || 'Não informado';
-            const cidade = rap.cidade || '-';
+            const cidade = pre.cidade || '-'; // Corrigido para buscar de preFraming
             const detalheRapport = rap.detalheRapport || '-';
             const ocupacaoStatus = pre.ocupacaoStatus === 'sim' ? 'Empregado' : 'Sem renda';
             const decisorStatus = pre.decisorStatus === 'sim' ? 'Decisor' : 'Não decisor';
@@ -2116,6 +2315,12 @@
             if (pre.temInvestimentoAgora === 'pix') temInvestimentoAgora = 'Sim no Pix';
             else if (pre.temInvestimentoAgora === 'credito') temInvestimentoAgora = 'Sim no Crédito';
             else if (pre.temInvestimentoAgora === 'nao') temInvestimentoAgora = 'Não tem agora';
+            
+            let comprometidoStr = pre.comprometido || '-';
+            if (comprometidoStr === '1') comprometidoStr = 'Nível 1 (Baixo / Frio)';
+            else if (comprometidoStr === '2') comprometidoStr = 'Nível 2 (Moderado / Morno)';
+            else if (comprometidoStr === '3') comprometidoStr = 'Nível 3 (Alto / Quente)';
+            else if (comprometidoStr === '4') comprometidoStr = 'Nível 4 (Máximo / Pronto)';
 
             const ambicao = map.ambicao || raw.inconsciente || 'Não mapeada';
             const dor = map.dor || raw.conscienteProblema || 'Não mapeada';
@@ -2124,10 +2329,63 @@
             const transformacao = map.transformacao || 'Não consolidada';
 
             const cabecalho = "NOME\tCIDADE\tDETALHE_CONEXAO\tOCUPAÇÃO\tDECISOR\tMETA_MENSAL\tPRAZO\tCAPITAL\tVALOR_DISPONÍVEL\tCOMPROMETIDO\tAMBIÇÃO\tDOR\tSOLUÇÃO\tSONHO\tTRANSFORMAÇÃO";
-            const linha = `${nome}\t${cidade}\t${detalheRapport}\t${ocupacaoStatus}\t${decisorStatus}\t${pre.metaMensal || '-'}\t${pre.prazo || '-'}\t${capital}\t${temInvestimentoAgora}\t${pre.comprometido || '-'}\t${ambicao}\t${dor}\t${solucao}\t${sonho}\t${transformacao}`;
+            const linha = `${cleanTsv(nome)}\t${cleanTsv(cidade)}\t${cleanTsv(detalheRapport)}\t${ocupacaoStatus}\t${decisorStatus}\t${cleanTsv(pre.metaMensal)}\t${cleanTsv(pre.prazo)}\t${cleanTsv(capital)}\t${temInvestimentoAgora}\t${comprometidoStr}\t${cleanTsv(ambicao)}\t${cleanTsv(dor)}\t${cleanTsv(solucao)}\t${cleanTsv(sonho)}\t${cleanTsv(transformacao)}`;
             const dadosPlanilha = `${cabecalho}\n${linha}`;
 
             fallbackCopiarTexto(dadosPlanilha, `Contexto de ${nome} copiado com sucesso!`);
+        };
+
+        window.exportarICPsEmLote = function() {
+            const calls = window.callsCacheArray || [];
+            // Filtra calls removendo os Reagendados e No-Shows (opcional, mas solicitado focar em tirar os reagendados)
+            const callsFiltradas = calls.filter(c => c.statusNormalizado !== 'Reagendado');
+
+            if (callsFiltradas.length === 0) {
+                showSystemToast('Nenhuma call válida para exportar (reagendamentos são ignorados).', 'error');
+                return;
+            }
+
+            const cabecalho = "DATA\tSTATUS\tNOME\tCIDADE\tDETALHE_CONEXAO\tOCUPAÇÃO\tDECISOR\tMETA_MENSAL\tPRAZO\tCAPITAL\tVALOR_DISPONÍVEL\tCOMPROMETIDO\tAMBIÇÃO\tDOR\tSOLUÇÃO\tSONHO\tTRANSFORMAÇÃO\tVALOR_FECHADO";
+            
+            const linhas = callsFiltradas.map(call => {
+                const icp = call.icp || {};
+                const pre = icp.preFraming || {};
+                const rap = icp.conexaoRapport || {};
+                const map = icp.mapeamento || {};
+                const raw = icp.respostasBrutas || {};
+
+                const dataFormat = new Date(call.data).toLocaleDateString('pt-BR');
+                const status = call.statusNormalizado || '-';
+
+                const nome = pre.nome || 'Não informado';
+                const cidade = pre.cidade || '-';
+                const detalheRapport = rap.detalheRapport || '-';
+                const ocupacaoStatus = pre.ocupacaoStatus === 'sim' ? 'Empregado' : 'Sem renda';
+                const decisorStatus = pre.decisorStatus === 'sim' ? 'Decisor' : 'Não decisor';
+                const capital = pre.capital || 'Não informado';
+                let temInvestimentoAgora = 'Não informado';
+                if (pre.temInvestimentoAgora === 'pix') temInvestimentoAgora = 'Sim no Pix';
+                else if (pre.temInvestimentoAgora === 'credito') temInvestimentoAgora = 'Sim no Crédito';
+                else if (pre.temInvestimentoAgora === 'nao') temInvestimentoAgora = 'Não tem agora';
+                
+                let comprometidoStr = pre.comprometido || '-';
+                if (comprometidoStr === '1') comprometidoStr = 'Nível 1 (Baixo / Frio)';
+                else if (comprometidoStr === '2') comprometidoStr = 'Nível 2 (Moderado / Morno)';
+                else if (comprometidoStr === '3') comprometidoStr = 'Nível 3 (Alto / Quente)';
+                else if (comprometidoStr === '4') comprometidoStr = 'Nível 4 (Máximo / Pronto)';
+
+                const ambicao = map.ambicao || raw.inconsciente || 'Não mapeada';
+                const dor = map.dor || raw.conscienteProblema || 'Não mapeada';
+                const solucao = raw.conscienteSolucao || 'Não mapeada';
+                const sonho = map.sonho || 'Não consolidado';
+                const transformacao = map.transformacao || 'Não consolidada';
+                const ticket = call.ticketProposto || 0;
+
+                return `${dataFormat}\t${status}\t${cleanTsv(nome)}\t${cleanTsv(cidade)}\t${cleanTsv(detalheRapport)}\t${ocupacaoStatus}\t${decisorStatus}\t${cleanTsv(pre.metaMensal)}\t${cleanTsv(pre.prazo)}\t${cleanTsv(capital)}\t${temInvestimentoAgora}\t${comprometidoStr}\t${cleanTsv(ambicao)}\t${cleanTsv(dor)}\t${cleanTsv(solucao)}\t${cleanTsv(sonho)}\t${cleanTsv(transformacao)}\t${ticket}`;
+            });
+
+            const dadosPlanilha = `${cabecalho}\n${linhas.join('\n')}`;
+            fallbackCopiarTexto(dadosPlanilha, `Lote com ${callsFiltradas.length} ICPs copiado! Cole no seu Excel/Sheets.`);
         };
 
         const loginScreen = document.getElementById('login-screen');
@@ -2499,7 +2757,8 @@
                             ocupacaoStatus: lead.ocupacaoStatus || 'sim',
                             decisorStatus: lead.decisorStatus || 'sim',
                             capital: lead.capital || '',
-                            temInvestimentoAgora: lead.temInvestimentoAgora || 'sim'
+                            temInvestimentoAgora: lead.temInvestimentoAgora || 'sim',
+                            comprometido: lead.comprometido || '3'
                         },
                         conexaoRapport: {
                             detalheRapport: lead.detalheRapport || ''
@@ -2546,7 +2805,8 @@
                             metaMensal: document.getElementById('icp-meta-mensal') ? document.getElementById('icp-meta-mensal').value : '',
                             prazo: document.getElementById('icp-prazo') ? document.getElementById('icp-prazo').value : '',
                             capital: document.getElementById('icp-capital').value || '',
-                            temInvestimentoAgora: document.getElementById('icp-tem-investimento-agora').value || 'sim'
+                            temInvestimentoAgora: document.getElementById('icp-tem-investimento-agora').value || 'sim',
+                            comprometido: document.getElementById('icp-comprometido').value || '3'
                         },
                         conexaoRapport: {
                             detalheRapport: document.getElementById('icp-detalhe-rapport') ? document.getElementById('icp-detalhe-rapport').value : ''
