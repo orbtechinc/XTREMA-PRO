@@ -22,6 +22,12 @@
         
         @keyframes pulse-border { 0% { border-color: rgba(245,158,11,0.2); } 50% { border-color: rgba(245,158,11,0.8); } 100% { border-color: rgba(245,158,11,0.2); } }
         .ia-processing { animation: pulse-border 1.5s infinite; }
+
+        @keyframes pulse-urgent-fast { 
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); transform: scale(1); } 
+            50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); transform: scale(1.02); } 
+        }
+        .btn-urgent-overdue { animation: pulse-urgent-fast 0.6s infinite; }
         
         .hidden-view { display: none !important; }
         .disabled-box { opacity: 0.3; pointer-events: none; filter: grayscale(100%); }
@@ -96,6 +102,63 @@
             <div class="flex justify-end gap-2">
                 <button type="button" onclick="fecharModalCheckout()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold transition-colors border border-slate-700">Cancelar</button>
                 <button type="button" onclick="confirmarCheckout()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-black transition-colors shadow-lg">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Customizado de Detalhes do Follow-up -->
+    <div id="followup-modal" class="fixed inset-0 z-[100] bg-slate-950/80 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-6 max-w-lg w-full animate-fade-in relative overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-amber-500" id="fup-modal-border"></div>
+            <div class="flex justify-between items-start mb-4 shrink-0">
+                <h3 class="text-lg font-black text-white flex items-center gap-2">
+                    <i data-lucide="calendar-search" class="w-5 h-5 text-amber-500"></i> Detalhes da Oportunidade
+                </h3>
+                <button onclick="fecharDetalhesFollowUp()" class="text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="overflow-y-auto pr-2 custom-scrollbar flex-1 space-y-4">
+                <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 text-center" id="fup-data-destaque">
+                    <p class="text-[10px] uppercase font-bold text-amber-500 tracking-wider mb-1">Follow-up Agendado Para</p>
+                    <p class="text-xl font-black text-amber-400" id="fup-data-texto">-</p>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                            <span class="text-[9px] text-slate-400 uppercase font-bold block mb-1">Lead</span>
+                            <span class="text-sm font-semibold text-white" id="fup-nome">-</span>
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                            <span class="text-[9px] text-slate-400 uppercase font-bold block mb-1">Capital p/ Investir</span>
+                            <span class="text-sm font-bold text-amber-400" id="fup-capital">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-[9px] text-slate-400 uppercase font-bold block mb-1">Status / Comprometimento</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-white" id="fup-nivel">-</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-[9px] text-slate-400 uppercase font-bold block mb-2">Diagnóstico Prévio da Call</span>
+                        <p class="text-xs text-slate-300 italic bg-slate-900 p-2 rounded border border-slate-700 mb-2"><strong class="text-emerald-400 not-italic">Ambição:</strong> <span id="fup-ambicao">-</span></p>
+                        <p class="text-xs text-slate-300 italic bg-slate-900 p-2 rounded border border-slate-700"><strong class="text-red-400 not-italic">Dor:</strong> <span id="fup-dor">-</span></p>
+                    </div>
+                    
+                    <div class="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                        <span class="text-[9px] text-slate-400 uppercase font-bold block mb-2">Anotações Livres</span>
+                        <p class="text-xs text-slate-300 whitespace-pre-wrap" id="fup-notas">-</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-slate-800 shrink-0 flex justify-end">
+                <button onclick="fecharDetalhesFollowUp()" class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-lg">Fechar Resumo</button>
             </div>
         </div>
     </div>
@@ -1770,13 +1833,31 @@
                 return;
             }
 
+            // Ordenação: Reagendados sempre no topo, ordenados pela data (mais antigos/atrasados primeiro).
+            leadsConfirmados.sort((a, b) => {
+                const isReagendadoA = !!a.reagendadoEm;
+                const isReagendadoB = !!b.reagendadoEm;
+                if (isReagendadoA && isReagendadoB) {
+                    return new Date(a.reagendadoEm) - new Date(b.reagendadoEm);
+                }
+                if (isReagendadoA) return -1;
+                if (isReagendadoB) return 1;
+                return 0; // Mantém ordem atual para as novas
+            });
+            try { localStorage.setItem('xtrema_leads_confirmados', JSON.stringify(leadsConfirmados)); } catch(e) {}
+
             container.innerHTML = leadsConfirmados.map((lead, index) => {
                 const isReagendado = !!lead.reagendadoEm;
                 let dataFormatadaReagendamento = '';
+                let isOverdue = false;
+                
                 if (isReagendado) {
                     try {
                         const d = new Date(lead.reagendadoEm);
                         dataFormatadaReagendamento = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                        // Calcula se já passou mais de 24h (1 dia) da data agendada
+                        const diffHours = (Date.now() - d.getTime()) / (1000 * 60 * 60);
+                        isOverdue = diffHours >= 24;
                     } catch(e) {
                         dataFormatadaReagendamento = lead.reagendadoEm;
                     }
@@ -1811,14 +1892,18 @@
                                 <p class="text-xs text-amber-400 font-medium flex items-center gap-1"><i data-lucide="dollar-sign" class="w-3 h-3"></i> ${lead.capital || 'Não especificado'} (${verbaAgoraTxt})</p>
                                 ${lead.detalheRapport ? `<p class="text-xs text-slate-300 italic flex items-center gap-1 max-w-md truncate" title="${lead.detalheRapport}"><i data-lucide="sparkles" class="w-3 h-3 text-amber-400 shrink-0"></i> ${lead.detalheRapport}</p>` : ''}
                             </div>
-                            ${isReagendado ? `<div class="mt-2.5"><span class="inline-flex items-center gap-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/50 px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-wider animate-pulse shadow-[0_0_15px_rgba(225,29,72,0.3)]"><i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> FOLLOWUP URGENTE: ${dataFormatadaReagendamento}</span></div>` : ''}
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 w-full md:w-auto shrink-0">
-                        <button onclick="registrarNoShow(${index})" class="flex-1 md:flex-none bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/40 px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex justify-center items-center gap-1.5" title="Registrar como No-Show (Lead não compareceu)">
+                    <div class="flex items-center gap-2 w-full md:w-auto shrink-0 mt-3 md:mt-0 flex-wrap md:flex-nowrap">
+                        ${isReagendado ? `
+                            <button onclick="abrirDetalhesFollowUp(${index})" class="w-full md:w-auto px-4 py-2.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all flex justify-center items-center gap-1.5 shadow-lg ${isOverdue ? 'bg-red-600 hover:bg-red-500 text-white border border-red-400 btn-urgent-overdue' : 'bg-amber-400 hover:bg-amber-300 text-slate-950 border border-red-500 animate-pulse'}" title="Ver Detalhes do Follow-up">
+                                <i data-lucide="bell-ring" class="w-4 h-4 ${isOverdue ? 'text-white' : 'text-red-700'}"></i> F-UP: ${dataFormatadaReagendamento}
+                            </button>
+                        ` : ''}
+                        <button onclick="registrarNoShow(${index})" class="flex-1 md:flex-none bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/40 px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex justify-center items-center gap-1.5" title="Registrar como No-Show (Lead não compareceu)">
                             <i data-lucide="user-x" class="w-3.5 h-3.5 text-rose-500"></i> No-Show
                         </button>
-                        <button onclick="iniciarCallConfirmada(${index})" class="flex-1 md:flex-none ${isReagendado ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} px-5 py-2 rounded-lg text-sm font-bold transition-colors flex justify-center items-center gap-2 shadow-lg">
+                        <button onclick="iniciarCallConfirmada(${index})" class="flex-1 md:flex-none ${isReagendado ? 'bg-blue-600 hover:bg-blue-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} px-5 py-2.5 rounded-lg text-sm font-bold transition-colors flex justify-center items-center gap-2 shadow-lg">
                             <i data-lucide="phone-call" class="w-4 h-4"></i> Iniciar Call
                         </button>
                     </div>
@@ -1845,6 +1930,62 @@
             if (window.calcularERenderizarDashboard) {
                 window.calcularERenderizarDashboard();
             }
+        }
+
+        // --- Follow up Modal Logic ---
+        function abrirDetalhesFollowUp(index) {
+            const lead = leadsConfirmados[index];
+            if (!lead || !lead.reagendadoEm) return;
+
+            const modal = document.getElementById('followup-modal');
+            const dataDestaque = document.getElementById('fup-data-texto');
+            const borderModal = document.getElementById('fup-modal-border');
+            const bgData = document.getElementById('fup-data-destaque');
+
+            const d = new Date(lead.reagendadoEm);
+            const dataFormatada = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+            
+            const diffHours = (Date.now() - d.getTime()) / (1000 * 60 * 60);
+            const isOverdue = diffHours >= 24;
+
+            if (isOverdue) {
+                borderModal.className = "absolute top-0 left-0 right-0 h-1 bg-red-600";
+                bgData.className = "bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-center";
+                dataDestaque.className = "text-xl font-black text-red-500";
+                dataDestaque.innerText = dataFormatada + " (ATRASADO)";
+            } else {
+                borderModal.className = "absolute top-0 left-0 right-0 h-1 bg-amber-500";
+                bgData.className = "bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 text-center";
+                dataDestaque.className = "text-xl font-black text-amber-400";
+                dataDestaque.innerText = dataFormatada;
+            }
+
+            document.getElementById('fup-nome').innerText = lead.nome || 'Não informado';
+            document.getElementById('fup-capital').innerText = lead.capital || 'Não informado';
+            
+            let compStr = lead.comprometido || '-';
+            if (compStr === '1') compStr = 'N1 - Frio (Curioso)';
+            else if (compStr === '2') compStr = 'N2 - Morno (Em maturação)';
+            else if (compStr === '3') compStr = 'N3 - Quente (Qualificado)';
+            else if (compStr === '4') compStr = 'N4 - Máximo (Prioridade)';
+            document.getElementById('fup-nivel').innerText = compStr;
+
+            if (lead.diagState) {
+                document.getElementById('fup-ambicao').innerText = lead.diagState.ambicao || '-';
+                document.getElementById('fup-dor').innerText = lead.diagState.dor || '-';
+                document.getElementById('fup-notas').innerText = lead.diagState.notas || 'Nenhuma anotação vinculada.';
+            } else {
+                document.getElementById('fup-ambicao').innerText = '-';
+                document.getElementById('fup-dor').innerText = '-';
+                document.getElementById('fup-notas').innerText = 'Nenhuma anotação vinculada.';
+            }
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function fecharDetalhesFollowUp() {
+            document.getElementById('followup-modal').classList.add('hidden');
         }
 
         // --- Call Flow & Timer Logic ---
