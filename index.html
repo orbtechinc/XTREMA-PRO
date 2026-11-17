@@ -235,7 +235,7 @@
                 <div class="grid grid-cols-5 gap-2">
                     <div class="bg-slate-950 p-2.5 rounded-lg border border-amber-500/30 shadow-inner flex flex-col justify-center">
                         <span class="text-[9px] text-amber-500 font-bold uppercase tracking-wider mb-0.5">Nível de Consciência</span>
-                        <span id="hdr-nivel" class="text-white text-[11px] font-medium truncate">1. Inconsciente</span>
+                        <span id="hdr-nivel" class="text-white text-[11px] font-medium truncate">1. INC (Inconsciente)</span>
                     </div>
                     <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-700 shadow-inner flex flex-col justify-center">
                         <span class="text-[9px] text-emerald-400 font-bold uppercase tracking-wider mb-0.5">Ambição</span>
@@ -563,6 +563,16 @@
                                     <span id="consc-produto-ganhas" class="text-xs font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-900/40 px-2 py-0.5 rounded">0 ganhas</span>
                                 </div>
                             </div>
+                            <div class="flex items-center justify-between p-2.5 bg-slate-800/40 border border-slate-700/60 rounded-xl">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                                    <span class="text-xs text-slate-300 font-medium">5. Total Consciente</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span id="consc-total-calls" class="text-xs text-slate-400">0 calls</span>
+                                    <span id="consc-total-ganhas" class="text-xs font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-900/40 px-2 py-0.5 rounded">0 ganhas</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -760,6 +770,7 @@
                             <thead class="text-xs text-slate-500 uppercase bg-slate-900/50 border-b border-slate-700">
                                 <tr>
                                     <th class="px-4 py-3 rounded-tl-lg">Data</th>
+                                    <th class="px-4 py-3">Nome</th>
                                     <th class="px-4 py-3">Tempo</th>
                                     <th class="px-4 py-3">Nível Consciência</th>
                                     <th class="px-4 py-3">Valor da Call</th>
@@ -769,7 +780,7 @@
                             </thead>
                             <tbody id="crm-table-body" class="divide-y divide-slate-700/50">
                                 <tr>
-                                    <td colspan="6" class="px-4 py-8 text-center text-slate-500 italic">Nenhuma call registrada ainda. Inicie uma nova call.</td>
+                                    <td colspan="7" class="px-4 py-8 text-center text-slate-500 italic">Nenhuma call registrada ainda. Inicie uma nova call.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -881,6 +892,13 @@
                                         <p class="text-sm text-white font-medium mb-3">"Qual é o melhor caminho pra você conseguir resolver esse problema hoje?"</p>
                                         <textarea id="diag-q3" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Se ele souber, o que ele imagina?"></textarea>
                                     </div>
+                                    <div id="box-tc" class="bg-slate-800 p-4 rounded-xl border border-slate-600 transition-all duration-300">
+                                        <label class="flex items-center gap-3 cursor-pointer">
+                                            <input type="checkbox" id="diag-q5-tc" onchange="processarDiagnostico()" class="w-4 h-4 rounded border-slate-500 bg-slate-900 text-amber-500 focus:ring-amber-500">
+                                            <span class="text-[11px] text-amber-500 font-bold uppercase">5. Totalmente Consciente</span>
+                                        </label>
+                                        <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">Marque se o lead já conhece você, o produto, a oferta e está 100% educado e pronto para a ancoragem.</p>
+                                    </div>
                                 </div>
 
                                 <div class="h-full sticky top-0 pt-2 space-y-4">
@@ -932,14 +950,6 @@
                                     <h3 class="text-xs font-bold text-amber-500 uppercase tracking-wider mb-4">Framework de Confirmação</h3>
                                     <div class="space-y-3 mb-6" id="checks-container">
                                         <!-- Checks via JS -->
-                                    </div>
-                                    
-                                    <div id="box-cso" class="bg-slate-900 p-4 rounded-xl border border-slate-700 transition-all duration-300">
-                                        <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
-                                            <span>Consciente do Produto (Concorrência)</span>
-                                        </label>
-                                        <p class="text-sm text-white font-medium mb-3">"Para termos total transparência: você está avaliando outras soluções no mercado ou a nossa é a sua única referência?"</p>
-                                        <textarea id="diag-q4" oninput="processarDiagnostico()" class="w-full bg-slate-800 border border-slate-600 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Anote a resposta sobre concorrentes/outras soluções..."></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -1119,21 +1129,22 @@
         ];
 
         const diagnosisLevels = [
-            { id: 1, title: '1. Inconsciente', action: 'ESTRUTURA: Crie um plano de ação baseado na estrutura da solução que voce tem pra ele.' },
             { id: 2, title: '2. Consciente do Problema', action: 'AMPLIAÇÃO: Aprofundar o impacto do problema e o custo de permanecer na situação atual.' },
             { id: 3, title: '3. Consciente da Solução', action: 'STORYTELLING: Usar histórias/exemplos para apresentar a lógica da solução.' },
-            { id: 4, title: '4. Consciente do Produto', action: 'APRESENTAÇÃO: Explicar o produto, estrutura e entregáveis.' }
+            { id: 4, title: '4. Consciente do Produto', action: 'APRESENTAÇÃO: Explicar o produto, estrutura e entregáveis.' },
+            { id: 5, title: '5. Total Consciente', action: 'DIRECIONAMENTO: Ir direto para o fechamento. Validar os termos e ancorar a oferta e o preço.' }
         ];
 
         const confirmQuestions = [
             { id: 'sim1', text: '"O plano de ação que criamos juntos hoje faz sentido pra te ajudar a superar seus desafios e resolver os seus problemas?"' },
-            { id: 'sim2', text: '"Temos dois caminhos agora. Caminho 1: você pode ficar parado e isso tem X custo até X dia. Caminho 2: você pode aplicar o que montamos junto de mim e conseguir o resultado X em X dias."' }
+            { id: 'sim2', text: '"Temos dois caminhos agora. Caminho 1: você pode ficar parado e isso tem X custo até X dia. Caminho 2: você pode aplicar o que montamos junto de mim e conseguir o resultado X em X dias."' },
+            { id: 'sim3', text: '"Você acredita que eu sou a pessoa certa para te ajudar a conquistar essa transformação?"' }
         ];
 
         let currentView = 'dashboard';
         let activeStep = 1;
         let activeDiagLevel = 1;
-        let checkState = { sim1: false, sim2: false };
+        let checkState = { sim1: false, sim2: false, sim3: false };
         let isCallLocked = true;
         let leadsConfirmados = [];
         let leadAtivoIndex = null;
@@ -1433,6 +1444,7 @@
                     'diag-q2': document.getElementById('diag-q2').value,
                     'diag-q3': document.getElementById('diag-q3').value,
                     'diag-q4': document.getElementById('diag-q4')?.value,
+                    'diag-q5-tc': document.getElementById('diag-q5-tc')?.checked,
                     'client-notes': document.getElementById('client-notes').value,
                     'hdr-sonho': document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]')?.value,
                     'hdr-transformacao': document.querySelector('#step-3 textarea[oninput*="hdr-transformacao"]')?.value,
@@ -1455,11 +1467,17 @@
                     callStartTime = state.callStartTime;
                     leadAtivoIndex = state.leadAtivoIndex;
                     leadAtivoOriginalDocId = state.leadAtivoOriginalDocId;
-                    checkState = state.checkState || { sim1: false, sim2: false };
+                    checkState = state.checkState || { sim1: false, sim2: false, sim3: false };
                     
                     for (const [id, value] of Object.entries(state.inputs || {})) {
                         const el = document.getElementById(id);
-                        if (el) el.value = value || '';
+                        if (el) {
+                            if (el.type === 'checkbox') {
+                                el.checked = value;
+                            } else {
+                                el.value = value || '';
+                            }
+                        }
                         
                         if (id === 'hdr-sonho') {
                             const elArea = document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]');
@@ -2056,6 +2074,7 @@
             if (document.getElementById('diag-q2')) document.getElementById('diag-q2').value = '';
             if (document.getElementById('diag-q3')) document.getElementById('diag-q3').value = '';
             if (document.getElementById('diag-q4')) document.getElementById('diag-q4').value = '';
+            if (document.getElementById('diag-q5-tc')) document.getElementById('diag-q5-tc').checked = false;
             if (document.getElementById('client-notes')) document.getElementById('client-notes').value = '';
             if (document.getElementById('action-input')) document.getElementById('action-input').value = '';
             const actionResult = document.getElementById('action-result');
@@ -2068,7 +2087,7 @@
             if (sonhotext) sonhotext.value = '';
             const transfText = document.querySelector('#step-3 textarea[oninput*="hdr-transformacao"]');
             if (transfText) transfText.value = '';
-            checkState = { sim1: false, sim2: false };
+            checkState = { sim1: false, sim2: false, sim3: false };
             renderChecks();
 
             if (document.getElementById('calc-hora')) document.getElementById('calc-hora').value = '';
@@ -2081,7 +2100,7 @@
             document.getElementById('hdr-dor').innerText = '-';
             document.getElementById('hdr-sonho').innerText = '-';
             document.getElementById('hdr-transformacao').innerText = '-';
-            document.getElementById('hdr-nivel').innerText = '1. Inconsciente';
+            document.getElementById('hdr-nivel').innerText = '1. INC (Inconsciente)';
 
             processarDiagnostico();
             isCallLocked = true;
@@ -2197,20 +2216,26 @@
             const val2 = document.getElementById('diag-q2').value.trim();
             const val3 = document.getElementById('diag-q3').value.trim();
             const val4 = document.getElementById('diag-q4') ? document.getElementById('diag-q4').value.trim() : '';
+            const isTc = document.getElementById('diag-q5-tc') ? document.getElementById('diag-q5-tc').checked : false;
 
             document.getElementById('box-csp').classList.toggle('disabled-box', !val1);
             document.getElementById('diag-q2').disabled = !val1;
 
             document.getElementById('box-css').classList.toggle('disabled-box', !val2);
             document.getElementById('diag-q3').disabled = !val2;
-
-            let level = 1; 
-            let levelName = '1. Inconsciente';
             
-            if (val1) { level = 1; levelName = '1. Inconsciente'; document.getElementById('hdr-ambicao').innerText = val1; } else { document.getElementById('hdr-ambicao').innerText = '-'; }
-            if (val2) { level = 2; levelName = '2. Consciente do Problema'; document.getElementById('hdr-dor').innerText = val2; } else { document.getElementById('hdr-dor').innerText = '-'; }
+            if (document.getElementById('box-cso')) {
+                document.getElementById('box-cso').classList.toggle('disabled-box', !val3);
+                if (document.getElementById('diag-q4')) document.getElementById('diag-q4').disabled = !val3;
+            }
+
             if (val3) { level = 3; levelName = '3. Consciente da Solução'; document.getElementById('recom-produto').innerHTML = `Se a solução que ele imagina é: "<strong class="text-white">${val3}</strong>", faça a ponte lógica com o seu produto agora.`; } else { document.getElementById('recom-produto').innerText = 'Aguardando diagnóstico do Nível 3 (CSS)...'; }
             if (val4) { level = 4; levelName = '4. Consciente do Produto'; }
+            
+            if (isTc) {
+                level = 5;
+                levelName = '5. Total Consciente';
+            }
 
             document.getElementById('hdr-nivel').innerText = levelName;
             document.getElementById('diag-action-text').innerText = diagnosisLevels.find(l => l.id === level).action;
@@ -2305,6 +2330,11 @@
             const map = icp.mapeamento || {};
             const raw = icp.respostasBrutas || {};
 
+            const dataFormatada = call.data ? new Date(call.data).toLocaleDateString('pt-BR') : '-';
+            const status = call.statusNormalizado || '-';
+            const ticket = call.ticketProposto || 0;
+            const nivelConsciencia = call.nivelConsciencia || '-';
+            
             const nome = pre.nome || 'Não informado';
             const cidade = pre.cidade || '-'; // Corrigido para buscar de preFraming
             const detalheRapport = rap.detalheRapport || '-';
@@ -2328,8 +2358,8 @@
             const sonho = map.sonho || 'Não consolidado';
             const transformacao = map.transformacao || 'Não consolidada';
 
-            const cabecalho = "NOME\tCIDADE\tDETALHE_CONEXAO\tOCUPAÇÃO\tDECISOR\tMETA_MENSAL\tPRAZO\tCAPITAL\tVALOR_DISPONÍVEL\tCOMPROMETIDO\tAMBIÇÃO\tDOR\tSOLUÇÃO\tSONHO\tTRANSFORMAÇÃO";
-            const linha = `${cleanTsv(nome)}\t${cleanTsv(cidade)}\t${cleanTsv(detalheRapport)}\t${ocupacaoStatus}\t${decisorStatus}\t${cleanTsv(pre.metaMensal)}\t${cleanTsv(pre.prazo)}\t${cleanTsv(capital)}\t${temInvestimentoAgora}\t${comprometidoStr}\t${cleanTsv(ambicao)}\t${cleanTsv(dor)}\t${cleanTsv(solucao)}\t${cleanTsv(sonho)}\t${cleanTsv(transformacao)}`;
+            const cabecalho = "DATA\tSTATUS\tVALOR_FECHADO\tNÍVEL_CONSCIÊNCIA\tNOME\tCIDADE\tDETALHE_CONEXAO\tOCUPAÇÃO\tDECISOR\tMETA_MENSAL\tPRAZO\tCAPITAL\tVALOR_DISPONÍVEL\tCOMPROMETIDO\tAMBIÇÃO\tDOR\tSOLUÇÃO\tSONHO\tTRANSFORMAÇÃO";
+            const linha = `${dataFormatada}\t${status}\t${ticket}\t${cleanTsv(nivelConsciencia)}\t${cleanTsv(nome)}\t${cleanTsv(cidade)}\t${cleanTsv(detalheRapport)}\t${ocupacaoStatus}\t${decisorStatus}\t${cleanTsv(pre.metaMensal)}\t${cleanTsv(pre.prazo)}\t${cleanTsv(capital)}\t${temInvestimentoAgora}\t${comprometidoStr}\t${cleanTsv(ambicao)}\t${cleanTsv(dor)}\t${cleanTsv(solucao)}\t${cleanTsv(sonho)}\t${cleanTsv(transformacao)}`;
             const dadosPlanilha = `${cabecalho}\n${linha}`;
 
             fallbackCopiarTexto(dadosPlanilha, `Contexto de ${nome} copiado com sucesso!`);
@@ -2345,7 +2375,7 @@
                 return;
             }
 
-            const cabecalho = "DATA\tSTATUS\tNOME\tCIDADE\tDETALHE_CONEXAO\tOCUPAÇÃO\tDECISOR\tMETA_MENSAL\tPRAZO\tCAPITAL\tVALOR_DISPONÍVEL\tCOMPROMETIDO\tAMBIÇÃO\tDOR\tSOLUÇÃO\tSONHO\tTRANSFORMAÇÃO\tVALOR_FECHADO";
+            const cabecalho = "DATA\tSTATUS\tVALOR_FECHADO\tNÍVEL_CONSCIÊNCIA\tNOME\tCIDADE\tDETALHE_CONEXAO\tOCUPAÇÃO\tDECISOR\tMETA_MENSAL\tPRAZO\tCAPITAL\tVALOR_DISPONÍVEL\tCOMPROMETIDO\tAMBIÇÃO\tDOR\tSOLUÇÃO\tSONHO\tTRANSFORMAÇÃO";
             
             const linhas = callsFiltradas.map(call => {
                 const icp = call.icp || {};
@@ -2380,8 +2410,9 @@
                 const sonho = map.sonho || 'Não consolidado';
                 const transformacao = map.transformacao || 'Não consolidada';
                 const ticket = call.ticketProposto || 0;
+                const nivelConsciencia = call.nivelConsciencia || '-';
 
-                return `${dataFormat}\t${status}\t${cleanTsv(nome)}\t${cleanTsv(cidade)}\t${cleanTsv(detalheRapport)}\t${ocupacaoStatus}\t${decisorStatus}\t${cleanTsv(pre.metaMensal)}\t${cleanTsv(pre.prazo)}\t${cleanTsv(capital)}\t${temInvestimentoAgora}\t${comprometidoStr}\t${cleanTsv(ambicao)}\t${cleanTsv(dor)}\t${cleanTsv(solucao)}\t${cleanTsv(sonho)}\t${cleanTsv(transformacao)}\t${ticket}`;
+                return `${dataFormat}\t${status}\t${ticket}\t${cleanTsv(nivelConsciencia)}\t${cleanTsv(nome)}\t${cleanTsv(cidade)}\t${cleanTsv(detalheRapport)}\t${ocupacaoStatus}\t${decisorStatus}\t${cleanTsv(pre.metaMensal)}\t${cleanTsv(pre.prazo)}\t${cleanTsv(capital)}\t${temInvestimentoAgora}\t${comprometidoStr}\t${cleanTsv(ambicao)}\t${cleanTsv(dor)}\t${cleanTsv(solucao)}\t${cleanTsv(sonho)}\t${cleanTsv(transformacao)}`;
             });
 
             const dadosPlanilha = `${cabecalho}\n${linhas.join('\n')}`;
@@ -2442,6 +2473,7 @@
 
         function normalizarNivelConsciencia(nivelRaw) {
             const n = String(nivelRaw || '').toLowerCase();
+            if (n.includes('total')) return 'total';
             if (n.includes('produto')) return 'produto';
             if (n.includes('solução') || n.includes('solucao')) return 'solucao';
             if (n.includes('problema') || n.includes('dor')) return 'problema';
@@ -2472,7 +2504,8 @@
                 inconsciente: { total: 0, ganhas: 0 },
                 problema: { total: 0, ganhas: 0 },
                 solucao: { total: 0, ganhas: 0 },
-                produto: { total: 0, ganhas: 0 }
+                produto: { total: 0, ganhas: 0 },
+                total: { total: 0, ganhas: 0 }
             };
 
             calls.forEach(item => {
@@ -2602,6 +2635,9 @@
 
             atualizarTexto('consc-produto-calls', `${niveis.produto.total} calls`);
             atualizarTexto('consc-produto-ganhas', `${niveis.produto.ganhas} ganhas`);
+
+            atualizarTexto('consc-total-calls', `${niveis.total.total} calls`);
+            atualizarTexto('consc-total-ganhas', `${niveis.total.ganhas} ganhas`);
         };
 
         // ==========================================
@@ -2821,7 +2857,8 @@
                             inconsciente: document.getElementById('qual-ambicao').value || '',
                             conscienteProblema: document.getElementById('diag-q2').value || '',
                             conscienteSolucao: document.getElementById('diag-q3').value || '',
-                            conscienteProduto: document.getElementById('diag-q4') ? document.getElementById('diag-q4').value : ''
+                            conscienteProduto: document.getElementById('diag-q4') ? document.getElementById('diag-q4').value : '',
+                            totalConsciente: document.getElementById('diag-q5-tc') ? document.getElementById('diag-q5-tc').checked : false
                         },
                         anotacoes: notaCliente
                     }
@@ -2866,12 +2903,24 @@
 
                 const tbody = document.getElementById('crm-table-body');
                 if (!tbody) return;
+                
+                function getSiglaConsciencia(nivel) {
+                    if (!nivel) return '-';
+                    const n = String(nivel).toLowerCase();
+                    if (n.includes('total')) return 'TC';
+                    if (n.includes('produto')) return 'CPRO';
+                    if (n.includes('solução') || n.includes('solucao')) return 'CS';
+                    if (n.includes('problema') || n.includes('dor')) return 'CP';
+                    if (n.includes('inconsciente')) return 'INC';
+                    return nivel;
+                }
 
                 if (listaCalls.length > 0) {
                     listaCalls.sort((a, b) => new Date(b.data) - new Date(a.data));
                     tbody.innerHTML = listaCalls.map(call => {
                         const dataFormatada = new Date(call.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit' });
                         const ticketNum = sanitizarNumero(call.ticketProposto);
+                        const siglaNivel = getSiglaConsciencia(call.nivelConsciencia);
                         
                         let statusBadge = '';
                         let valorClasse = 'text-slate-400';
@@ -2899,7 +2948,7 @@
                             <tr class="hover:bg-slate-800/30 transition-colors">
                                 <td class="px-4 py-3 font-medium text-slate-300">${dataFormatada}</td>
                                 <td class="px-4 py-3"><span class="bg-slate-800 px-2 py-1 rounded text-xs font-mono">${call.tempo || '00:00'}</span></td>
-                                <td class="px-4 py-3 text-amber-500 text-xs">${call.nivelConsciencia || '-'}</td>
+                                <td class="px-4 py-3 text-amber-500 font-bold text-xs">${siglaNivel}</td>
                                 <td class="px-4 py-3 ${valorClasse}">${textoValor}</td>
                                 <td class="px-4 py-3">${statusBadge}</td>
                                 <td class="px-4 py-3 text-right">
@@ -2916,7 +2965,7 @@
                         `;
                     }).join('');
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500 italic">Nenhuma call registrada ainda. Inicie uma nova call.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500 italic">Nenhuma call registrada ainda. Inicie uma nova call.</td></tr>`;
                 }
 
                 lucide.createIcons();
