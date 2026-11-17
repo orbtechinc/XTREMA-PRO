@@ -1483,10 +1483,12 @@
                         if (id === 'hdr-sonho') {
                             const elArea = document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]');
                             if(elArea) elArea.value = value || '';
+                            document.getElementById('hdr-sonho').innerText = value || '-';
                         }
                         if (id === 'hdr-transformacao') {
                             const elArea = document.querySelector('#step-3 textarea[oninput*="hdr-transformacao"]');
                             if(elArea) elArea.value = value || '';
+                            document.getElementById('hdr-transformacao').innerText = value || '-';
                         }
                     }
 
@@ -2276,6 +2278,9 @@
             const val3 = document.getElementById('diag-q3').value.trim();
             const val4 = document.getElementById('diag-q4') ? document.getElementById('diag-q4').value.trim() : '';
             const isTc = document.getElementById('diag-q5-tc') ? document.getElementById('diag-q5-tc').checked : false;
+
+            document.getElementById('hdr-ambicao').innerText = val1 || '-';
+            document.getElementById('hdr-dor').innerText = val2 || '-';
 
             document.getElementById('box-csp').classList.toggle('disabled-box', !val1);
             document.getElementById('diag-q2').disabled = !val1;
