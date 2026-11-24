@@ -955,6 +955,13 @@
                                         <p class="text-sm text-white font-medium mb-3">"Qual é o melhor caminho pra você conseguir resolver esse problema hoje?"</p>
                                         <textarea id="diag-q3" oninput="processarDiagnostico()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="Se ele souber, o que ele imagina?"></textarea>
                                     </div>
+                                    <div id="box-cso" class="bg-slate-800 p-4 rounded-xl border border-slate-600 disabled-box transition-all duration-300">
+                                        <label class="text-[11px] text-amber-500 font-bold uppercase mb-2 flex justify-between">
+                                            <span>4. Consciente do Produto (Oferta)</span>
+                                        </label>
+                                        <p class="text-sm text-white font-medium mb-3">"Você já conhece o nosso método/acompanhamento e sabe como podemos te ajudar na prática?"</p>
+                                        <textarea id="diag-q4" oninput="processarDiagnostico()" disabled class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-slate-200 focus:border-amber-500 outline-none resize-none h-16" placeholder="O que ele já sabe sobre o seu produto ou oferta?"></textarea>
+                                    </div>
                                     <div id="box-tc" class="bg-slate-800 p-4 rounded-xl border border-slate-600 transition-all duration-300">
                                         <label class="flex items-center gap-3 cursor-pointer">
                                             <input type="checkbox" id="diag-q5-tc" onchange="processarDiagnostico()" class="w-4 h-4 rounded border-slate-500 bg-slate-900 text-amber-500 focus:ring-amber-500">
@@ -2044,6 +2051,7 @@
                 if (document.getElementById('qual-ambicao')) document.getElementById('qual-ambicao').value = lead.diagState.ambicao || '';
                 if (document.getElementById('diag-q2')) document.getElementById('diag-q2').value = lead.diagState.dor || '';
                 if (document.getElementById('diag-q3')) document.getElementById('diag-q3').value = lead.diagState.solucao || '';
+                if (document.getElementById('diag-q4')) document.getElementById('diag-q4').value = lead.diagState.produto || '';
                 if (document.getElementById('diag-q5-tc')) document.getElementById('diag-q5-tc').checked = lead.diagState.tc || false;
                 if (document.getElementById('client-notes')) document.getElementById('client-notes').value = lead.diagState.notas || '';
                 
@@ -2068,6 +2076,7 @@
                 if (document.getElementById('qual-ambicao')) document.getElementById('qual-ambicao').value = '';
                 if (document.getElementById('diag-q2')) document.getElementById('diag-q2').value = '';
                 if (document.getElementById('diag-q3')) document.getElementById('diag-q3').value = '';
+                if (document.getElementById('diag-q4')) document.getElementById('diag-q4').value = '';
                 if (document.getElementById('diag-q5-tc')) document.getElementById('diag-q5-tc').checked = false;
                 if (document.getElementById('client-notes')) document.getElementById('client-notes').value = '';
                 const sonhotext = document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]');
@@ -2184,6 +2193,7 @@
                     ambicao: document.getElementById('qual-ambicao').value || '',
                     dor: document.getElementById('diag-q2').value || '',
                     solucao: document.getElementById('diag-q3').value || '',
+                    produto: document.getElementById('diag-q4') ? document.getElementById('diag-q4').value : '',
                     tc: document.getElementById('diag-q5-tc') ? document.getElementById('diag-q5-tc').checked : false,
                     notas: document.getElementById('client-notes').value || '',
                     sonho: document.querySelector('#step-3 textarea[oninput*="hdr-sonho"]')?.value || '',
