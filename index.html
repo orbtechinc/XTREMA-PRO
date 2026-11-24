@@ -163,6 +163,57 @@
         </div>
     </div>
 
+    <!-- Modal Customizado de Recuperação de Lead do Histórico -->
+    <div id="recuperar-lead-modal" class="fixed inset-0 z-[100] bg-slate-950/80 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-6 max-w-sm w-full animate-fade-in relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
+            <h3 class="text-lg font-black text-white mb-2 flex items-center gap-2">
+                <i data-lucide="rotate-ccw" class="w-5 h-5 text-emerald-400"></i> Recuperar Lead
+            </h3>
+            <p class="text-xs text-slate-400 mb-4">
+                Devolva <strong id="rec-lead-nome" class="text-white">-</strong> (<span id="rec-lead-status" class="text-amber-400 font-bold">-</span>) para a fila de <strong>Oportunidades</strong> preservando todo o diagnóstico, anotações e tempo de call anteriores.
+            </p>
+
+            <div class="space-y-3 mb-5">
+                <div>
+                    <label class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1 block">Nova Data & Hora do Follow-up / Call (Opcional)</label>
+                    <input type="datetime-local" id="recuperar-lead-data" class="w-full bg-slate-800 border border-emerald-500/40 rounded-lg p-2.5 text-xs text-white focus:border-emerald-400 outline-none">
+                    <p class="text-[10px] text-slate-500 mt-1">Defina uma data para ativar o alerta de Follow-up ou deixe em branco para entrar como "Pronto".</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="fecharModalRecuperarLead()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold transition-colors border border-slate-700">Cancelar</button>
+                <button type="button" onclick="confirmarRecuperacaoLead()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-black transition-colors shadow-lg flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Recuperar p/ Oportunidades
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Customizado de Aviso de Lead Duplicado -->
+    <div id="duplicate-lead-modal" class="fixed inset-0 z-[100] bg-slate-950/80 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-amber-500/50 rounded-xl shadow-2xl p-6 max-w-md w-full animate-fade-in relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-amber-500"></div>
+            <h3 class="text-lg font-black text-amber-400 mb-2 flex items-center gap-2">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i> Lead Já Existe no Histórico!
+            </h3>
+            <p id="dup-lead-msg" class="text-xs text-slate-300 leading-relaxed mb-5">
+                Já existe um registro para este lead no histórico. Para não duplicar oportunidades nem distorcer suas métricas, localize e recupere o contato pelo histórico.
+            </p>
+
+            <div class="flex flex-wrap justify-end gap-2">
+                <button type="button" onclick="fecharModalDuplicado()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold transition-colors border border-slate-700">Fechar</button>
+                <button type="button" onclick="localizarLeadNoHistorico()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-black transition-colors shadow-lg flex items-center gap-1.5">
+                    <i data-lucide="search" class="w-3.5 h-3.5"></i> Localizar no Histórico
+                </button>
+                <button type="button" id="btn-dup-recuperar-direto" onclick="recuperarLeadDuplicadoDireto()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-black transition-colors shadow-lg flex items-center gap-1.5">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Recuperar Agora
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TELA DE AUTENTICAÇÃO (LOGIN & CADASTRO) -->
     <div id="login-screen" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md relative overflow-hidden">
@@ -818,15 +869,25 @@
                 </div>
 
                 <!-- Histórico CRM Integrado -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 relative shadow-lg">
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                <div id="crm-history-card" class="bg-slate-800 border border-slate-700 rounded-xl p-6 relative shadow-lg">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
                         <div class="flex items-center gap-2">
                             <h3 class="text-sm font-bold text-white">Histórico Recente de Calls (CRM)</h3>
                             <span id="crm-status" class="bg-amber-500/20 text-amber-500 text-[10px] px-2 py-0.5 rounded font-bold flex items-center gap-1"><i data-lucide="wifi" class="w-3 h-3"></i> Sincronizando...</span>
                         </div>
-                        <button onclick="exportarICPsEmLote()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 border border-slate-600 shadow-md">
-                            <i data-lucide="copy-check" class="w-4 h-4 text-emerald-400"></i> Copiar ICPs (Lote)
-                        </button>
+                        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                            <!-- Barra de Pesquisa por Nome (Lupa) -->
+                            <div class="relative flex-1 md:w-64">
+                                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                <input type="text" id="crm-search-input" oninput="filtrarHistoricoCRM(this.value)" placeholder="Pesquisar lead por nome..." class="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 rounded-lg pl-8 pr-7 py-1.5 text-xs text-white outline-none transition-colors">
+                                <button type="button" id="btn-clear-crm-search" onclick="limparBuscaCRM()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors" title="Limpar busca">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                            <button onclick="exportarICPsEmLote()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 border border-slate-600 shadow-md shrink-0">
+                                <i data-lucide="copy-check" class="w-4 h-4 text-emerald-400"></i> Copiar ICPs (Lote)
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-slate-400">
@@ -1243,6 +1304,186 @@
         
         let statusPendenteCheckout = '';
         let isScriptFullscreen = false;
+        let callIdParaRecuperar = null;
+        let duplicateMatchInfo = null;
+
+        function normalizarTextoBusca(str) {
+            return String(str || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim()
+                .toLowerCase();
+        }
+
+        function filtrarHistoricoCRM(termo) {
+            const btnClear = document.getElementById('btn-clear-crm-search');
+            if (btnClear) {
+                btnClear.classList.toggle('hidden', !termo || !termo.trim());
+            }
+            if (window.renderTabelaCRM) {
+                window.renderTabelaCRM(termo);
+            }
+        }
+
+        function limparBuscaCRM() {
+            const input = document.getElementById('crm-search-input');
+            if (input) input.value = '';
+            filtrarHistoricoCRM('');
+        }
+
+        function abrirModalRecuperarLead(callId) {
+            const call = window.callsHistoricoCache ? window.callsHistoricoCache[callId] : null;
+            if (!call) {
+                showSystemToast('Registro do lead não encontrado no histórico.', 'error');
+                return;
+            }
+
+            const nomeLead = (call.icp && call.icp.preFraming && call.icp.preFraming.nome) ? call.icp.preFraming.nome : 'Lead Sem Nome';
+            const nomeNorm = normalizarTextoBusca(nomeLead);
+
+            // Impede duplicação caso o lead já esteja ativo na fila de Oportunidades
+            const jaNaFila = leadsConfirmados.some(l =>
+                (l.historicoDocId && l.historicoDocId === callId) ||
+                (nomeNorm && normalizarTextoBusca(l.nome) === nomeNorm)
+            );
+            if (jaNaFila) {
+                showSystemToast(`"${nomeLead}" já está na fila de Oportunidades!`, 'error');
+                return;
+            }
+
+            callIdParaRecuperar = callId;
+            document.getElementById('rec-lead-nome').innerText = nomeLead;
+            document.getElementById('rec-lead-status').innerText = call.statusNormalizado || call.status || '-';
+
+            // Sugere o próximo dia como padrão no campo de data/hora
+            const amanha = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            amanha.setMinutes(amanha.getMinutes() - amanha.getTimezoneOffset());
+            document.getElementById('recuperar-lead-data').value = amanha.toISOString().slice(0, 16);
+
+            document.getElementById('recuperar-lead-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function fecharModalRecuperarLead() {
+            callIdParaRecuperar = null;
+            document.getElementById('recuperar-lead-modal').classList.add('hidden');
+        }
+
+        function confirmarRecuperacaoLead() {
+            if (!callIdParaRecuperar || !window.callsHistoricoCache || !window.callsHistoricoCache[callIdParaRecuperar]) {
+                fecharModalRecuperarLead();
+                return;
+            }
+
+            const call = window.callsHistoricoCache[callIdParaRecuperar];
+            const dataNova = document.getElementById('recuperar-lead-data').value || null;
+            const icp = call.icp || {};
+            const pre = icp.preFraming || {};
+            const rap = icp.conexaoRapport || {};
+            const map = icp.mapeamento || {};
+            const raw = icp.respostasBrutas || {};
+
+            // Converte o tempo salvo (MM:SS) de volta para segundos para retomar de onde parou
+            let tempoSegs = 0;
+            if (call.tempo && String(call.tempo).includes(':')) {
+                const partes = String(call.tempo).split(':');
+                tempoSegs = ((parseInt(partes[0], 10) || 0) * 60) + (parseInt(partes[1], 10) || 0);
+            }
+
+            const leadRecuperado = {
+                nome: pre.nome || 'Lead Sem Nome',
+                cidade: pre.cidade || '',
+                detalheRapport: rap.detalheRapport || '',
+                ocupacaoStatus: pre.ocupacaoStatus || 'sim',
+                decisorStatus: pre.decisorStatus || 'sim',
+                metaMensal: pre.metaMensal || '',
+                prazo: pre.prazo || '',
+                capital: pre.capital || '',
+                temInvestimentoAgora: pre.temInvestimentoAgora || 'pix',
+                comprometido: pre.comprometido || '3',
+                historicoDocId: call.id,
+                tempoAcumulado: tempoSegs,
+                reagendadoEm: dataNova || null,
+                recuperadoDe: call.statusNormalizado || call.status || 'Histórico',
+                diagState: {
+                    ambicao: map.ambicao || raw.inconsciente || '',
+                    dor: map.dor || raw.conscienteProblema || '',
+                    solucao: raw.conscienteSolucao || '',
+                    produto: raw.conscienteProduto || '',
+                    tc: !!raw.totalConsciente,
+                    notas: icp.anotacoes || '',
+                    sonho: map.sonho || '',
+                    transformacao: map.transformacao || '',
+                    calcHora: '',
+                    calcMult: '',
+                    checkState: { sim1: false, sim2: false, sim3: false }
+                }
+            };
+
+            leadsConfirmados.unshift(leadRecuperado);
+            try {
+                localStorage.setItem('xtrema_leads_confirmados', JSON.stringify(leadsConfirmados));
+            } catch (e) {}
+
+            fecharModalRecuperarLead();
+            renderListaLeads();
+            goToView('agenda');
+
+            // Rola para o topo da lista de Oportunidades para destacar o lead recuperado
+            const viewAgenda = document.getElementById('view-agenda');
+            if (viewAgenda) viewAgenda.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (window.calcularERenderizarDashboard) {
+                window.calcularERenderizarDashboard();
+            }
+            showSystemToast(`Lead "${leadRecuperado.nome}" recuperado para Oportunidades com sucesso!`);
+        }
+
+        function fecharModalDuplicado() {
+            duplicateMatchInfo = null;
+            document.getElementById('duplicate-lead-modal').classList.add('hidden');
+        }
+
+        function localizarLeadNoHistorico() {
+            if (!duplicateMatchInfo) {
+                fecharModalDuplicado();
+                return;
+            }
+            const nomeBusca = duplicateMatchInfo.nome;
+            const origem = duplicateMatchInfo.origem;
+            fecharModalDuplicado();
+            goToView('agenda');
+
+            if (origem === 'historico') {
+                const input = document.getElementById('crm-search-input');
+                if (input) {
+                    input.value = nomeBusca;
+                    filtrarHistoricoCRM(nomeBusca);
+                }
+                setTimeout(() => {
+                    const card = document.getElementById('crm-history-card');
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 150);
+                showSystemToast(`Contato "${nomeBusca}" localizado no histórico! Use o botão de recuperar.`);
+            } else {
+                const viewAgenda = document.getElementById('view-agenda');
+                if (viewAgenda) viewAgenda.scrollTo({ top: 0, behavior: 'smooth' });
+                showSystemToast(`"${nomeBusca}" já está na fila de Oportunidades.`);
+            }
+        }
+
+        function recuperarLeadDuplicadoDireto() {
+            if (!duplicateMatchInfo || duplicateMatchInfo.origem !== 'historico') {
+                fecharModalDuplicado();
+                return;
+            }
+            const callId = duplicateMatchInfo.callId;
+            fecharModalDuplicado();
+            resetQualificacao();
+            abrirModalRecuperarLead(callId);
+        }
 
         function alternarModoAuth(modo) {
             authMode = modo;
@@ -1792,7 +2033,39 @@
         }
 
         function salvarLeadConfirmado() {
-            const nome = document.getElementById('icp-nome').value || 'Lead Sem Nome';
+            const nome = (document.getElementById('icp-nome').value || '').trim() || 'Lead Sem Nome';
+            const nomeNorm = normalizarTextoBusca(nome);
+
+            // 1. Verifica se o lead já existe na fila ativa de Oportunidades
+            const existenteNaFila = leadsConfirmados.find(l => normalizarTextoBusca(l.nome) === nomeNorm);
+            if (existenteNaFila && nomeNorm !== 'lead sem nome') {
+                duplicateMatchInfo = { origem: 'fila', nome: existenteNaFila.nome };
+                document.getElementById('dup-lead-msg').innerHTML = `O lead <strong class="text-white">${existenteNaFila.nome}</strong> já está cadastrado na sua fila de <strong class="text-emerald-400">Oportunidades Confirmadas</strong>. Não é necessário duplicá-lo.`;
+                document.getElementById('btn-dup-recuperar-direto').classList.add('hidden');
+                document.getElementById('duplicate-lead-modal').classList.remove('hidden');
+                lucide.createIcons();
+                return;
+            }
+
+            // 2. Verifica se o lead já existe no Histórico do CRM usando o nome como critério
+            const callsHistorico = window.callsCacheArray || [];
+            const matchHistorico = nomeNorm !== 'lead sem nome'
+                ? callsHistorico.find(c => c.icp && c.icp.preFraming && normalizarTextoBusca(c.icp.preFraming.nome) === nomeNorm)
+                : null;
+
+            if (matchHistorico) {
+                const nomeHist = matchHistorico.icp.preFraming.nome;
+                const dataHist = matchHistorico.data ? new Date(matchHistorico.data).toLocaleDateString('pt-BR') : '-';
+                const statusHist = matchHistorico.statusNormalizado || matchHistorico.status || '-';
+
+                duplicateMatchInfo = { origem: 'historico', nome: nomeHist, callId: matchHistorico.id };
+                document.getElementById('dup-lead-msg').innerHTML = `O lead <strong class="text-white">${nomeHist}</strong> já possui registro no histórico do CRM (<strong class="text-amber-400">${statusHist}</strong> em ${dataHist}). Para não duplicar oportunidades nem distorcer suas métricas, localize ou recupere este contato diretamente pelo histórico.`;
+                document.getElementById('btn-dup-recuperar-direto').classList.remove('hidden');
+                document.getElementById('duplicate-lead-modal').classList.remove('hidden');
+                lucide.createIcons();
+                return;
+            }
+
             const cidade = document.getElementById('icp-cidade') ? document.getElementById('icp-cidade').value : '';
             const detalheRapport = document.getElementById('icp-detalhe-rapport') ? document.getElementById('icp-detalhe-rapport').value : '';
             const ocupacaoStatus = document.getElementById('icp-ocupacao-status').value || 'sim';
@@ -1889,7 +2162,9 @@
                                 ${lead.nome} 
                                 ${isReagendado 
                                     ? `<span class="bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0 flex items-center gap-1"><i data-lucide='calendar' class='w-2.5 h-2.5'></i> Reagendado</span>`
-                                    : `<span class="bg-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0">Pronto</span>`
+                                    : (lead.recuperadoDe
+                                        ? `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0 flex items-center gap-1"><i data-lucide='rotate-ccw' class='w-2.5 h-2.5'></i> Recuperado</span>`
+                                        : `<span class="bg-emerald-500/20 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded uppercase font-bold shrink-0">Pronto</span>`)
                                 }
                                 ${lead.cidade ? `<span class="bg-slate-800 text-slate-400 text-[10px] px-2 py-0.5 rounded border border-slate-700 flex items-center gap-1"><i data-lucide="map-pin" class="w-2.5 h-2.5 text-amber-500"></i> ${lead.cidade}</span>` : ''}
                             </h4>
@@ -3006,9 +3281,16 @@
                 const callsRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'calls');
                 const docIdExistente = lead.historicoDocId || null;
 
+                // Preserva tempo acumulado e diagnóstico prévio caso o lead já tenha feito call/reagendado antes do No-Show
+                const tempoPreservado = lead.tempoAcumulado ? formatarSegundosParaMMSS(lead.tempoAcumulado) : '00:00';
+                const diag = lead.diagState || {};
+                const notasPreservadas = diag.notas
+                    ? `${diag.notas}\n\n[No-Show registrado em ${new Date().toLocaleDateString('pt-BR')}]`
+                    : 'Lead não compareceu à reunião marcada (No-Show).';
+
                 const dadosNoShow = {
                     data: new Date().toISOString(),
-                    tempo: '00:00',
+                    tempo: tempoPreservado,
                     nivelConsciencia: 'No-Show',
                     ticketProposto: 0,
                     status: 'No-Show',
@@ -3018,6 +3300,8 @@
                             cidade: lead.cidade || '',
                             ocupacaoStatus: lead.ocupacaoStatus || 'sim',
                             decisorStatus: lead.decisorStatus || 'sim',
+                            metaMensal: lead.metaMensal || '',
+                            prazo: lead.prazo || '',
                             capital: lead.capital || '',
                             temInvestimentoAgora: lead.temInvestimentoAgora || 'sim',
                             comprometido: lead.comprometido || '3'
@@ -3025,9 +3309,20 @@
                         conexaoRapport: {
                             detalheRapport: lead.detalheRapport || ''
                         },
-                        mapeamento: { ambicao: '', dor: '', sonho: '', transformacao: '' },
-                        respostasBrutas: { inconsciente: '', conscienteProblema: '', conscienteSolucao: '', conscienteProduto: '' },
-                        anotacoes: 'Lead não compareceu à reunião marcada (No-Show).'
+                        mapeamento: {
+                            ambicao: diag.ambicao || '',
+                            dor: diag.dor || '',
+                            sonho: diag.sonho || '',
+                            transformacao: diag.transformacao || ''
+                        },
+                        respostasBrutas: {
+                            inconsciente: diag.ambicao || '',
+                            conscienteProblema: diag.dor || '',
+                            conscienteSolucao: diag.solucao || '',
+                            conscienteProduto: diag.produto || '',
+                            totalConsciente: !!diag.tc
+                        },
+                        anotacoes: notasPreservadas
                     }
                 };
 
@@ -3091,20 +3386,110 @@
                 };
 
                 if (docIdExistente) {
-                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'calls', docIdExistente);
-                    await setDoc(docRef, dadosCall, { merge: true });
-                    if (callbackNovoId) callbackNovoId(docIdExistente);
+                    const callRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'calls', docIdExistente);
+                    await setDoc(callRef, dadosCall, { merge: true });
+                    if (typeof callbackNovoId === 'function') callbackNovoId(docIdExistente);
                 } else {
-                    const docAdded = await addDoc(callsRef, dadosCall);
-                    if (callbackNovoId && docAdded?.id) {
-                        callbackNovoId(docAdded.id);
-                    }
+                    const docRef = await addDoc(callsRef, dadosCall);
+                    if (typeof callbackNovoId === 'function') callbackNovoId(docRef.id);
                 }
 
                 await window.carregarDashboardFirebase();
             } catch (error) {
                 console.error("Erro ao salvar call no Firebase:", error);
+                showSystemToast("Erro ao sincronizar call na nuvem.", "error");
             }
+        };
+
+        window.renderTabelaCRM = function(termoBusca = '') {
+            const tbody = document.getElementById('crm-table-body');
+            if (!tbody) return;
+
+            const listaOriginal = Array.isArray(window.callsCacheArray) ? [...window.callsCacheArray] : [];
+            const termoNorm = normalizarTextoBusca(termoBusca);
+
+            const listaFiltrada = termoNorm
+                ? listaOriginal.filter(call => {
+                    const nomeLead = (call.icp && call.icp.preFraming && call.icp.preFraming.nome) ? call.icp.preFraming.nome : '';
+                    return normalizarTextoBusca(nomeLead).includes(termoNorm);
+                })
+                : listaOriginal;
+
+            function getSiglaConsciencia(nivel) {
+                if (!nivel) return '-';
+                const n = String(nivel).toLowerCase();
+                if (n.includes('total')) return 'TC';
+                if (n.includes('produto')) return 'CPRO';
+                if (n.includes('solução') || n.includes('solucao')) return 'CS';
+                if (n.includes('problema') || n.includes('dor')) return 'CP';
+                if (n.includes('inconsciente')) return 'INC';
+                return nivel;
+            }
+
+            if (listaFiltrada.length > 0) {
+                listaFiltrada.sort((a, b) => new Date(b.data) - new Date(a.data));
+                tbody.innerHTML = listaFiltrada.map(call => {
+                    const dataFormatada = new Date(call.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit' });
+                    const ticketNum = sanitizarNumero(call.ticketProposto);
+                    const siglaNivel = getSiglaConsciencia(call.nivelConsciencia);
+                    
+                    let statusBadge = '';
+                    let valorClasse = 'text-slate-400';
+                    let textoValor = formatarMoeda(ticketNum);
+
+                    if (call.statusNormalizado === 'Ganho') {
+                        statusBadge = '<span class="bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold px-2 py-1 rounded">Ganho</span>';
+                        valorClasse = 'text-emerald-400 font-bold';
+                    } else if (call.statusNormalizado === 'Perdido') {
+                        statusBadge = '<span class="bg-red-500/20 text-red-400 text-[10px] uppercase font-bold px-2 py-1 rounded">Perdido</span>';
+                        valorClasse = 'text-red-400 font-bold';
+                    } else if (call.statusNormalizado === 'Reagendado') {
+                        statusBadge = '<span class="bg-blue-500/20 text-blue-400 text-[10px] uppercase font-bold px-2 py-1 rounded">Reagendado</span>';
+                        valorClasse = 'text-blue-400 font-medium';
+                        if (ticketNum === 0) textoValor = '<span class="text-slate-500 text-xs">-</span>';
+                    } else if (call.statusNormalizado === 'No-Show') {
+                        statusBadge = '<span class="bg-rose-500/20 text-rose-400 text-[10px] uppercase font-bold px-2 py-1 rounded">No-Show</span>';
+                        valorClasse = 'text-rose-400 font-medium';
+                        textoValor = '<span class="text-slate-500 text-xs">-</span>';
+                    } else {
+                        statusBadge = `<span class="bg-slate-700 text-slate-300 text-[10px] uppercase font-bold px-2 py-1 rounded">${call.status || 'Outro'}</span>`;
+                    }
+
+                    const nomeLead = (call.icp && call.icp.preFraming && call.icp.preFraming.nome) ? call.icp.preFraming.nome : 'Desconhecido';
+                    const destaqueBusca = termoNorm ? 'bg-amber-500/10 border-l-2 border-l-amber-500' : '';
+
+                    return `
+                        <tr class="hover:bg-slate-800/30 transition-colors ${destaqueBusca}">
+                            <td class="px-4 py-3 font-medium text-slate-300 whitespace-nowrap">${dataFormatada}</td>
+                            <td class="px-4 py-3 text-slate-300 font-semibold truncate max-w-[140px]" title="${nomeLead}">${nomeLead}</td>
+                            <td class="px-4 py-3"><span class="bg-slate-800 px-2 py-1 rounded text-xs font-mono text-slate-400">${call.tempo || '00:00'}</span></td>
+                            <td class="px-4 py-3 text-amber-500 font-bold text-xs">${siglaNivel}</td>
+                            <td class="px-4 py-3 ${valorClasse} whitespace-nowrap">${textoValor}</td>
+                            <td class="px-4 py-3">${statusBadge}</td>
+                            <td class="px-4 py-3 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button onclick="abrirModalRecuperarLead('${call.id}')" class="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded transition-colors p-1" title="Recuperar Lead para Oportunidades">
+                                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="copiarICPHistorico('${call.id}')" class="text-slate-400 hover:text-amber-400 transition-colors p-1" title="Copiar Dossiê ICP">
+                                        <i data-lucide="copy" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="prepararExclusao('${call.id}')" class="text-slate-500 hover:text-red-500 transition-colors p-1" title="Excluir registro">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } else {
+                const msgVazia = termoNorm
+                    ? `Nenhum lead encontrado no histórico com o nome "${termoBusca}".`
+                    : 'Nenhuma call registrada ainda. Inicie uma nova call.';
+                tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500 italic">${msgVazia}</td></tr>`;
+            }
+
+            lucide.createIcons();
         };
 
         window.carregarDashboardFirebase = async function() {
@@ -3127,77 +3512,8 @@
 
                 window.calcularERenderizarDashboard(listaCalls);
 
-                const tbody = document.getElementById('crm-table-body');
-                if (!tbody) return;
-                
-                function getSiglaConsciencia(nivel) {
-                    if (!nivel) return '-';
-                    const n = String(nivel).toLowerCase();
-                    if (n.includes('total')) return 'TC';
-                    if (n.includes('produto')) return 'CPRO';
-                    if (n.includes('solução') || n.includes('solucao')) return 'CS';
-                    if (n.includes('problema') || n.includes('dor')) return 'CP';
-                    if (n.includes('inconsciente')) return 'INC';
-                    return nivel;
-                }
-
-                if (listaCalls.length > 0) {
-                    listaCalls.sort((a, b) => new Date(b.data) - new Date(a.data));
-                    tbody.innerHTML = listaCalls.map(call => {
-                        const dataFormatada = new Date(call.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit' });
-                        const ticketNum = sanitizarNumero(call.ticketProposto);
-                        const siglaNivel = getSiglaConsciencia(call.nivelConsciencia);
-                        
-                        let statusBadge = '';
-                        let valorClasse = 'text-slate-400';
-                        let textoValor = formatarMoeda(ticketNum);
-
-                        if (call.statusNormalizado === 'Ganho') {
-                            statusBadge = '<span class="bg-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold px-2 py-1 rounded">Ganho</span>';
-                            valorClasse = 'text-emerald-400 font-bold';
-                        } else if (call.statusNormalizado === 'Perdido') {
-                            statusBadge = '<span class="bg-red-500/20 text-red-400 text-[10px] uppercase font-bold px-2 py-1 rounded">Perdido</span>';
-                            valorClasse = 'text-red-400 font-bold';
-                        } else if (call.statusNormalizado === 'Reagendado') {
-                            statusBadge = '<span class="bg-blue-500/20 text-blue-400 text-[10px] uppercase font-bold px-2 py-1 rounded">Reagendado</span>';
-                            valorClasse = 'text-blue-400 font-medium';
-                            if (ticketNum === 0) textoValor = '<span class="text-slate-500 text-xs">-</span>';
-                        } else if (call.statusNormalizado === 'No-Show') {
-                            statusBadge = '<span class="bg-rose-500/20 text-rose-400 text-[10px] uppercase font-bold px-2 py-1 rounded">No-Show</span>';
-                            valorClasse = 'text-rose-400 font-medium';
-                            textoValor = '<span class="text-slate-500 text-xs">-</span>';
-                        } else {
-                            statusBadge = `<span class="bg-slate-700 text-slate-300 text-[10px] uppercase font-bold px-2 py-1 rounded">${call.status || 'Outro'}</span>`;
-                        }
-
-                        const nomeLead = (call.icp && call.icp.preFraming && call.icp.preFraming.nome) ? call.icp.preFraming.nome : 'Desconhecido';
-
-                        return `
-                            <tr class="hover:bg-slate-800/30 transition-colors">
-                                <td class="px-4 py-3 font-medium text-slate-300 whitespace-nowrap">${dataFormatada}</td>
-                                <td class="px-4 py-3 text-slate-300 font-semibold truncate max-w-[120px]" title="${nomeLead}">${nomeLead}</td>
-                                <td class="px-4 py-3"><span class="bg-slate-800 px-2 py-1 rounded text-xs font-mono text-slate-400">${call.tempo || '00:00'}</span></td>
-                                <td class="px-4 py-3 text-amber-500 font-bold text-xs">${siglaNivel}</td>
-                                <td class="px-4 py-3 ${valorClasse} whitespace-nowrap">${textoValor}</td>
-                                <td class="px-4 py-3">${statusBadge}</td>
-                                <td class="px-4 py-3 text-right">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <button onclick="copiarICPHistorico('${call.id}')" class="text-slate-400 hover:text-amber-400 transition-colors p-1" title="Copiar Dossiê ICP">
-                                            <i data-lucide="copy" class="w-4 h-4"></i>
-                                        </button>
-                                        <button onclick="prepararExclusao('${call.id}')" class="text-slate-500 hover:text-red-500 transition-colors p-1" title="Excluir registro">
-                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500 italic">Nenhuma call registrada ainda. Inicie uma nova call.</td></tr>`;
-                }
-
-                lucide.createIcons();
+                const termoAtual = document.getElementById('crm-search-input') ? document.getElementById('crm-search-input').value : '';
+                window.renderTabelaCRM(termoAtual);
             } catch (error) {
                 console.error("Erro ao puxar dados do CRM:", error);
             }
