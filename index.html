@@ -214,6 +214,44 @@
         </div>
     </div>
 
+    <!-- Modal Customizado de Configuração de Meta Mensal & Forecast -->
+    <div id="meta-mensal-modal" class="fixed inset-0 z-[100] bg-slate-950/80 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-6 max-w-md w-full animate-fade-in relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-emerald-500"></div>
+            <div class="flex justify-between items-start mb-3">
+                <h3 class="text-lg font-black text-white flex items-center gap-2">
+                    <i data-lucide="target" class="w-5 h-5 text-amber-400"></i> Configurar Meta Mensal
+                </h3>
+                <button type="button" onclick="fecharModalMetaMensal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-400 mb-5">Defina sua meta de faturamento do mês e sua rotina semanal para calcular automaticamente o ritmo diário, semanal e a projeção de fechamento.</p>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1.5 block">Meta Mensal de Faturamento (R$)</label>
+                    <input type="number" id="input-meta-mensal-valor" min="0" step="100" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-base font-bold text-white focus:border-amber-500 outline-none" placeholder="Ex: 50000">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">Rotina de Operação Comercial</label>
+                    <select id="input-meta-dias-semana" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-xs text-white focus:border-amber-500 outline-none cursor-pointer">
+                        <option value="5">5 dias/semana (Segunda a Sexta)</option>
+                        <option value="6">6 dias/semana (Segunda a Sábado)</option>
+                        <option value="7">7 dias/semana (Todos os dias)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="fecharModalMetaMensal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold transition-colors border border-slate-700">Cancelar</button>
+                <button type="button" onclick="salvarMetaMensal()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-black transition-colors shadow-lg flex items-center gap-1.5">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Salvar Meta & Forecast
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TELA DE AUTENTICAÇÃO (LOGIN & CADASTRO) -->
     <div id="login-screen" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md relative overflow-hidden">
@@ -387,9 +425,124 @@
                         <p class="text-slate-400 text-xs">Visão em tempo real de receita, conversão, tempo de negociação e eficiência tática.</p>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button onclick="abrirModalMetaMensal()" class="text-[10px] font-black text-slate-950 uppercase bg-amber-500 hover:bg-amber-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors shadow-lg shadow-amber-500/20 cursor-pointer">
+                            <i data-lucide="target" class="w-3.5 h-3.5"></i> Definir Meta Mensal
+                        </button>
                         <span class="text-[10px] font-bold text-slate-400 uppercase bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
                             <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-amber-500"></i> Métricas em Tempo Real
                         </span>
+                    </div>
+                </div>
+
+                <!-- Bloco 0: Controle de Meta Mensal & Forecast Inteligente -->
+                <div id="forecast-card" class="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 border border-amber-500/30 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                                    <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i> Forecast & Controle de Meta (<span id="forecast-mes-label" class="text-amber-400">-</span>)
+                                </h3>
+                                <span id="forecast-status-badge" class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                                    Defina sua meta
+                                </span>
+                            </div>
+                            <p id="forecast-subtitulo" class="text-[11px] text-slate-400 mt-0.5">Acompanhe quanto precisa vender hoje, na semana e no mês com projeção baseada no seu ritmo real.</p>
+                        </div>
+                        <button onclick="abrirModalMetaMensal()" class="text-[11px] font-bold text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer">
+                            <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> Ajustar Meta
+                        </button>
+                    </div>
+
+                    <!-- Barra de Progresso do Mês com Marcador de Ritmo Esperado -->
+                    <div class="mb-5">
+                        <div class="flex justify-between items-end text-xs mb-1.5">
+                            <span class="text-slate-300 font-semibold">
+                                Realizado no Mês: <strong id="forecast-realizado-mes-topo" class="text-emerald-400 font-black">R$ 0,00</strong>
+                                <span class="text-slate-500">de</span>
+                                <strong id="forecast-meta-mes-topo" class="text-white font-black">R$ 0,00</strong>
+                            </span>
+                            <div class="flex items-center gap-3 text-[11px]">
+                                <span class="text-slate-400 hidden sm:inline">Ritmo esperado hoje: <strong id="forecast-ritmo-esperado-pct" class="text-slate-200">0%</strong></span>
+                                <span id="forecast-progresso-pct" class="font-black text-amber-400 text-sm">0%</span>
+                            </div>
+                        </div>
+                        <div class="w-full h-3.5 bg-slate-800 rounded-full overflow-hidden relative border border-slate-700/70">
+                            <div id="forecast-progress-bar" class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-500 rounded-full" style="width: 0%"></div>
+                            <div id="forecast-expected-marker" class="absolute top-0 bottom-0 w-0.5 bg-white/90 shadow-[0_0_8px_rgba(255,255,255,0.9)] transition-all duration-500" style="left: 0%" title="Ritmo ideal esperado para hoje"></div>
+                        </div>
+                    </div>
+
+                    <!-- Grid 4 Colunas: Dia, Semana, Mês e Projeção -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <!-- Meta do Dia -->
+                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-blue-400">Meta Diária (Ritmo)</span>
+                                <i data-lucide="sun" class="w-3.5 h-3.5 text-blue-400"></i>
+                            </div>
+                            <div class="my-1">
+                                <span class="text-[10px] text-slate-500 block">Necessário por dia restante:</span>
+                                <h4 id="forecast-meta-dia-necessaria" class="text-xl font-black text-white tracking-tight">R$ 0,00</h4>
+                            </div>
+                            <div class="pt-2 mt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
+                                <span class="text-slate-400">Hoje: <strong id="forecast-realizado-hoje" class="text-emerald-400">R$ 0</strong></span>
+                                <span class="text-slate-500">Base: <strong id="forecast-meta-dia-base" class="text-slate-300">R$ 0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Meta da Semana -->
+                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-purple-400">Meta Semanal</span>
+                                <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-purple-400"></i>
+                            </div>
+                            <div class="my-1">
+                                <span class="text-[10px] text-slate-500 block">Alvo da semana:</span>
+                                <h4 id="forecast-meta-semana" class="text-xl font-black text-white tracking-tight">R$ 0,00</h4>
+                            </div>
+                            <div class="pt-2 mt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
+                                <span class="text-slate-400">Semana: <strong id="forecast-realizado-semana" class="text-emerald-400">R$ 0</strong></span>
+                                <span class="text-slate-500">Falta: <strong id="forecast-falta-semana" class="text-purple-300">R$ 0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Falta no Mês (Gap) -->
+                        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-amber-400">Saldo p/ Bater Meta</span>
+                                <i data-lucide="flag" class="w-3.5 h-3.5 text-amber-400"></i>
+                            </div>
+                            <div class="my-1">
+                                <span class="text-[10px] text-slate-500 block">Falta fechar no mês:</span>
+                                <h4 id="forecast-falta-mes" class="text-xl font-black text-amber-400 tracking-tight">R$ 0,00</h4>
+                            </div>
+                            <div class="pt-2 mt-2 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
+                                <span class="text-slate-400">Dias úteis rest.: <strong id="forecast-dias-restantes" class="text-white">0d</strong></span>
+                                <span class="text-slate-500">Vendas mês: <strong id="forecast-vendas-mes" class="text-emerald-400">0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Projeção Baseada no Desempenho -->
+                        <div class="bg-gradient-to-br from-emerald-950/30 to-slate-950 border border-emerald-500/30 rounded-xl p-4 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-emerald-400">Projeção de Fechamento</span>
+                                <i data-lucide="trending-up" class="w-3.5 h-3.5 text-emerald-400"></i>
+                            </div>
+                            <div class="my-1">
+                                <span class="text-[10px] text-slate-500 block">Mantendo seu desempenho atual:</span>
+                                <h4 id="forecast-projecao-valor" class="text-xl font-black text-emerald-400 tracking-tight">R$ 0,00</h4>
+                            </div>
+                            <div class="pt-2 mt-2 border-t border-emerald-950/80 flex justify-between items-center text-[11px]">
+                                <span class="text-slate-400">Atingimento: <strong id="forecast-projecao-pct" class="text-white">0%</strong></span>
+                                <span class="text-slate-500">Ritmo: <strong id="forecast-ritmo-diario" class="text-emerald-300">R$ 0/d</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Faixa Tática de Projeção (Vendas & Calls Necessárias) -->
+                    <div id="forecast-insight-bar" class="mt-3 p-3 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-300 flex items-center gap-2">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                        <span id="forecast-insight-texto">Clique em "Definir Meta Mensal" para ativar o acompanhamento de forecast e saber exatamente quantas vendas e calls faltam.</span>
                     </div>
                 </div>
                 
@@ -1288,6 +1441,7 @@
         let leadAtivoIndex = null;
         let leadAtivoOriginalDocId = null;
         let totalAgendamentosCriados = 0;
+        let metaMensalConfig = { valor: 0, diasPorSemana: 5 };
         
         let authMode = 'login'; 
 
@@ -1295,7 +1449,80 @@
             totalAgendamentosCriados = parseInt(localStorage.getItem('xtrema_total_agendamentos') || '0', 10);
             const savedLeads = localStorage.getItem('xtrema_leads_confirmados');
             if (savedLeads) leadsConfirmados = JSON.parse(savedLeads);
+            const savedMeta = localStorage.getItem('xtrema_meta_mensal_config');
+            if (savedMeta) {
+                const parsedMeta = JSON.parse(savedMeta);
+                metaMensalConfig = {
+                    valor: Number(parsedMeta.valor) || 0,
+                    diasPorSemana: Number(parsedMeta.diasPorSemana) || 5
+                };
+            }
         } catch(e) {}
+
+        function abrirModalMetaMensal() {
+            const inputVal = document.getElementById('input-meta-mensal-valor');
+            const selectDias = document.getElementById('input-meta-dias-semana');
+            if (inputVal) inputVal.value = metaMensalConfig.valor > 0 ? metaMensalConfig.valor : '';
+            if (selectDias) selectDias.value = String(metaMensalConfig.diasPorSemana || 5);
+            document.getElementById('meta-mensal-modal').classList.remove('hidden');
+            lucide.createIcons();
+            setTimeout(() => { if (inputVal) inputVal.focus(); }, 100);
+        }
+
+        function fecharModalMetaMensal() {
+            document.getElementById('meta-mensal-modal').classList.add('hidden');
+        }
+
+        function salvarMetaMensal() {
+            const valorInput = parseFloat(document.getElementById('input-meta-mensal-valor').value) || 0;
+            const diasSemana = parseInt(document.getElementById('input-meta-dias-semana').value, 10) || 5;
+
+            if (valorInput <= 0) {
+                showSystemToast('Informe um valor maior que zero para a meta mensal.', 'error');
+                return;
+            }
+
+            metaMensalConfig = { valor: valorInput, diasPorSemana: diasSemana };
+            try {
+                localStorage.setItem('xtrema_meta_mensal_config', JSON.stringify(metaMensalConfig));
+            } catch (e) {}
+
+            if (window.salvarMetaNoFirebase) {
+                window.salvarMetaNoFirebase(metaMensalConfig);
+            }
+
+            fecharModalMetaMensal();
+            if (window.calcularERenderizarDashboard) {
+                window.calcularERenderizarDashboard();
+            }
+            showSystemToast(`Meta mensal de R$ ${valorInput.toLocaleString('pt-BR')} atualizada!`);
+        }
+
+        function calcularDiasOperacaoMes(ano, mes, diaAtual, diasPorSemana) {
+            const totalDiasCalendario = new Date(ano, mes + 1, 0).getDate();
+            let totalOperacao = 0;
+            let decorridos = 0;
+            let restantes = 0;
+
+            for (let d = 1; d <= totalDiasCalendario; d++) {
+                const diaSemana = new Date(ano, mes, d).getDay(); // 0=Dom, 6=Sab
+                let ehDiaUtil = true;
+                if (diasPorSemana === 5) ehDiaUtil = (diaSemana !== 0 && diaSemana !== 6);
+                else if (diasPorSemana === 6) ehDiaUtil = (diaSemana !== 0);
+
+                if (ehDiaUtil) {
+                    totalOperacao++;
+                    if (d <= diaAtual) decorridos++;
+                    if (d >= diaAtual) restantes++;
+                }
+            }
+
+            return {
+                totalOperacao: Math.max(1, totalOperacao),
+                decorridos: Math.max(1, decorridos),
+                restantes: Math.max(1, restantes)
+            };
+        }
         
         let timerInterval;
         let seconds = 0;
@@ -2798,7 +3025,7 @@
             createUserWithEmailAndPassword, 
             signOut 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, getDoc, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'xtrema-pro-local';
         const firebaseConfig = {
@@ -3139,6 +3366,150 @@
 
             atualizarTexto('consc-total-calls', `${niveis.total.total} calls`);
             atualizarTexto('consc-total-ganhas', `${niveis.total.ganhas} ganhas`);
+
+            // ==========================================
+            // MOTOR DE FORECAST & META MENSAL
+            // ==========================================
+            const agora = new Date();
+            const anoAtual = agora.getFullYear();
+            const mesAtual = agora.getMonth();
+            const diaAtual = agora.getDate();
+
+            const nomeMes = agora.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            atualizarTexto('forecast-mes-label', nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1));
+
+            // Início da semana atual (Segunda-feira 00:00)
+            const diaDaSemana = agora.getDay();
+            const diffSegunda = diaDaSemana === 0 ? 6 : diaDaSemana - 1;
+            const inicioSemana = new Date(anoAtual, mesAtual, diaAtual - diffSegunda, 0, 0, 0, 0);
+
+            let receitaMesAtual = 0;
+            let vendasMesAtual = 0;
+            let callsDecididasMes = 0;
+            let receitaHoje = 0;
+            let receitaSemanaAtual = 0;
+
+            calls.forEach(item => {
+                if (!item.data) return;
+                const d = new Date(item.data);
+                if (isNaN(d.getTime())) return;
+
+                const status = normalizarStatus(item.status);
+                const valor = sanitizarNumero(item.ticketProposto);
+
+                if (d.getFullYear() === anoAtual && d.getMonth() === mesAtual) {
+                    if (status === 'Ganho') {
+                        receitaMesAtual += valor;
+                        vendasMesAtual++;
+                        callsDecididasMes++;
+                        if (d.getDate() === diaAtual) {
+                            receitaHoje += valor;
+                        }
+                    } else if (status === 'Perdido') {
+                        callsDecididasMes++;
+                    }
+                }
+
+                if (status === 'Ganho' && d >= inicioSemana) {
+                    receitaSemanaAtual += valor;
+                }
+            });
+
+            const metaValor = sanitizarNumero(metaMensalConfig.valor);
+            const diasPorSemana = Number(metaMensalConfig.diasPorSemana) || 5;
+            const calendario = calcularDiasOperacaoMes(anoAtual, mesAtual, diaAtual, diasPorSemana);
+
+            const faltaMes = Math.max(0, metaValor - receitaMesAtual);
+            const progressoPct = metaValor > 0 ? Math.round((receitaMesAtual / metaValor) * 100) : 0;
+            const progressoBarPct = Math.min(100, progressoPct);
+            const ritmoEsperadoPct = Math.round((calendario.decorridos / calendario.totalOperacao) * 100);
+
+            const metaDiaBase = metaValor > 0 ? (metaValor / calendario.totalOperacao) : 0;
+            const metaDiaNecessaria = metaValor > 0 ? (faltaMes / calendario.restantes) : 0;
+
+            const semanasNoMes = calendario.totalOperacao / diasPorSemana;
+            const metaSemana = metaValor > 0 ? (metaValor / Math.max(1, semanasNoMes)) : 0;
+            const faltaSemana = Math.max(0, metaSemana - receitaSemanaAtual);
+
+            const ritmoDiarioAtual = receitaMesAtual / calendario.decorridos;
+            const projecaoFechamento = ritmoDiarioAtual * calendario.totalOperacao;
+            const projecaoPct = metaValor > 0 ? Math.round((projecaoFechamento / metaValor) * 100) : 0;
+
+            atualizarTexto('forecast-realizado-mes-topo', formatarMoeda(receitaMesAtual));
+            atualizarTexto('forecast-meta-mes-topo', formatarMoeda(metaValor));
+            atualizarTexto('forecast-progresso-pct', `${progressoPct}%`);
+            atualizarTexto('forecast-ritmo-esperado-pct', `${ritmoEsperadoPct}%`);
+
+            const barForecast = document.getElementById('forecast-progress-bar');
+            const markerExpected = document.getElementById('forecast-expected-marker');
+            if (barForecast) barForecast.style.width = `${progressoBarPct}%`;
+            if (markerExpected) markerExpected.style.left = `${Math.min(100, ritmoEsperadoPct)}%`;
+
+            atualizarTexto('forecast-meta-dia-necessaria', formatarMoeda(metaDiaNecessaria));
+            atualizarTexto('forecast-realizado-hoje', formatarMoeda(receitaHoje));
+            atualizarTexto('forecast-meta-dia-base', formatarMoeda(metaDiaBase));
+
+            atualizarTexto('forecast-meta-semana', formatarMoeda(metaSemana));
+            atualizarTexto('forecast-realizado-semana', formatarMoeda(receitaSemanaAtual));
+            atualizarTexto('forecast-falta-semana', formatarMoeda(faltaSemana));
+
+            atualizarTexto('forecast-falta-mes', formatarMoeda(faltaMes));
+            atualizarTexto('forecast-dias-restantes', `${calendario.restantes}d`);
+            atualizarTexto('forecast-vendas-mes', vendasMesAtual);
+
+            atualizarTexto('forecast-projecao-valor', formatarMoeda(projecaoFechamento));
+            atualizarTexto('forecast-projecao-pct', `${projecaoPct}%`);
+            atualizarTexto('forecast-ritmo-diario', `${formatarMoeda(ritmoDiarioAtual)}/d`);
+
+            const badgeStatus = document.getElementById('forecast-status-badge');
+            const insightTexto = document.getElementById('forecast-insight-texto');
+
+            if (metaValor <= 0) {
+                if (badgeStatus) {
+                    badgeStatus.innerText = 'Meta Não Definida';
+                    badgeStatus.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700';
+                }
+                if (insightTexto) {
+                    insightTexto.innerHTML = 'Clique em <strong class="text-amber-400">Definir Meta Mensal</strong> para ativar o controle de forecast diário, semanal e a projeção automática.';
+                }
+            } else if (receitaMesAtual >= metaValor) {
+                if (badgeStatus) {
+                    badgeStatus.innerText = 'Meta Batida!';
+                    badgeStatus.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+                }
+                if (insightTexto) {
+                    insightTexto.innerHTML = `Parabéns! Você já superou sua meta mensal em <strong class="text-emerald-400">${formatarMoeda(receitaMesAtual - metaValor)}</strong>. Mantendo esse ritmo, você fecha o mês em <strong class="text-white">${formatarMoeda(projecaoFechamento)}</strong>.`;
+                }
+            } else {
+                if (projecaoFechamento >= metaValor) {
+                    if (badgeStatus) {
+                        badgeStatus.innerText = 'No Ritmo da Meta';
+                        badgeStatus.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+                    }
+                } else if (projecaoFechamento >= metaValor * 0.8) {
+                    if (badgeStatus) {
+                        badgeStatus.innerText = 'Atenção • Abaixo do Ritmo';
+                        badgeStatus.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40';
+                    }
+                } else {
+                    if (badgeStatus) {
+                        badgeStatus.innerText = 'Risco • Acelerar Volume';
+                        badgeStatus.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40';
+                    }
+                }
+
+                const ticketRef = vendasMesAtual > 0 ? (receitaMesAtual / vendasMesAtual) : ticketMedioGanho;
+                const winRateRef = callsDecididasMes > 0 ? (vendasMesAtual / callsDecididasMes) : (taxaComercial / 100);
+
+                if (ticketRef > 0 && insightTexto) {
+                    const vendasFaltantes = Math.ceil(faltaMes / ticketRef);
+                    const callsFaltantes = winRateRef > 0 ? Math.ceil(vendasFaltantes / winRateRef) : vendasFaltantes;
+                    const callsPorDia = (callsFaltantes / calendario.restantes).toFixed(1).replace('.', ',');
+                    insightTexto.innerHTML = `Com base no seu Ticket Médio (<strong class="text-white">${formatarMoeda(ticketRef)}</strong>) e Win Rate (<strong class="text-emerald-400">${Math.round(winRateRef * 100)}%</strong>), faltam aprox. <strong class="text-amber-400">${vendasFaltantes} vendas</strong> (~<strong class="text-white">${callsFaltantes} calls</strong> no total, ou <strong class="text-blue-400">${callsPorDia} calls/dia</strong>) para bater a meta.`;
+                } else if (insightTexto) {
+                    insightTexto.innerHTML = `Faltam <strong class="text-amber-400">${formatarMoeda(faltaMes)}</strong> nos próximos <strong class="text-white">${calendario.restantes} dias úteis</strong> (${formatarMoeda(metaDiaNecessaria)}/dia). Registre suas primeiras vendas para liberar o cálculo de calls necessárias.`;
+                }
+            }
         };
 
         // ==========================================
@@ -3272,8 +3643,46 @@
             
             renderListaLeads();
             initUI();
+            window.carregarMetaFirebase();
             carregarDashboardFirebase();
         }
+
+        window.salvarMetaNoFirebase = async function(configMeta) {
+            if (!currentUser) return;
+            try {
+                const metaRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'meta_mensal');
+                await setDoc(metaRef, {
+                    valor: Number(configMeta.valor) || 0,
+                    diasPorSemana: Number(configMeta.diasPorSemana) || 5,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {
+                console.error("Erro ao salvar meta mensal no Firebase:", e);
+            }
+        };
+
+        window.carregarMetaFirebase = async function() {
+            if (!currentUser) return;
+            try {
+                const metaRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'meta_mensal');
+                const snap = await getDoc(metaRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    metaMensalConfig = {
+                        valor: Number(data.valor) || 0,
+                        diasPorSemana: Number(data.diasPorSemana) || 5
+                    };
+                    try {
+                        localStorage.setItem('xtrema_meta_mensal_config', JSON.stringify(metaMensalConfig));
+                    } catch (e) {}
+                    if (window.calcularERenderizarDashboard) {
+                        window.calcularERenderizarDashboard();
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao carregar meta mensal do Firebase:", e);
+            }
+        };
 
         window.salvarNoShowNoFirebase = async function(lead) {
             if (!currentUser) return;
